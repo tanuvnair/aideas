@@ -10,17 +10,10 @@ const PORT = process.env.PORT || 4000;
 app.use(cors());
 app.use(express.json());
 
-app.use((req, res, next) => {
-  console.log("Parsed JSON body:", req.body);
-  next();
-});
-
+// Routes
 app.use("/auth", authRoutes);
 
-app.use("*", (req, res) => {
-  res.status(404).json({ error: "Route not found" });
-});
-
+// The server starts listening
 app.listen(PORT, () => {
   console.log(`🚀 Server running at http://localhost:${PORT}`);
 });
