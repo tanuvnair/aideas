@@ -29,8 +29,8 @@ export default function LandingPage() {
         </div>
 
         <div className="flex items-center gap-4">
-          <Button variant="ghost">Features</Button>
-          <Button>Get Started</Button>
+          <Button variant="outline">Sign In</Button>
+          <Button>Sign Up</Button>
           <Button variant="ghost" onClick={toggleTheme} className=" ">
             {theme === "dark" ? (
               <Sun className="h-5 w-5" />
