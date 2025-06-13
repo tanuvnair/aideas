@@ -196,4 +196,53 @@ router.get("/callback", (req, res) => {
   }
 });
 
+// Request password reset
+router.post("/forgot-password", async (req, res) => {
+  try {
+    const { email } = req.body;
+
+    // Validate email
+    if (!email || !email.trim()) {
+      return sendValidationError(res, [
+        createError("email", "REQUIRED", "Email is required"),
+      ]);
+    }
+
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      return sendValidationError(res, [
+        createError(
+          "email",
+          "INVALID_FORMAT",
+          "Please provide a valid email address"
+        ),
+      ]);
+    }
+
+    const { data, error } = await supabase.auth.resetPasswordForEmail(
+      email.trim().toLowerCase(),
+      {
+        redirectTo: `${
+          process.env.FRONTEND_URL || "http://localhost:3000"
+        }/reset-password`,
+      }
+    );
+
+    if (error) {
+      return sendError(res, 400, "Password reset failed", [
+        createError("auth", "PASSWORD_RESET_ERROR", error.message),
+      ]);
+    }
+
+    // Even if the email doesn't exist, return success for security
+    sendSuccess(
+      res,
+      200,
+      null,
+      "If an account exists with this email, you'll receive a password reset link"
+    );
+  } catch (err) {
+    sendServerError(res, "Internal server error", err);
+  }
+});
+
 export default router;
