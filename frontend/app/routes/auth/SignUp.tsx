@@ -12,7 +12,7 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { Brain, Eye, EyeOff, Mail, ArrowLeft } from "lucide-react";
+import { Brain, Eye, EyeOff, Mail, User, ArrowLeft } from "lucide-react";
 import { useState } from "react";
 import { useForm, type SubmitHandler } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -23,7 +23,7 @@ import type { Route } from "../../+types/root";
 
 export const meta: Route.MetaFunction = () => {
   return [
-    { title: "AIdeas - Sign In" },
+    { title: "AIdeas - Sign Up" },
     {
       name: "description",
       content:
@@ -41,6 +41,7 @@ export const meta: Route.MetaFunction = () => {
 
 // Form validation schema
 const formSchema = z.object({
+  name: z.string().min(1, "Name is required"),
   email: z
     .string()
     .min(1, "Email is required")
@@ -49,39 +50,42 @@ const formSchema = z.object({
     .string()
     .min(1, "Password is required")
     .min(6, "Password must be at least 6 characters"),
-  rememberMe: z.boolean(),
+  terms: z.boolean().refine((val) => val === true, {
+    message: "You must accept the terms and conditions",
+  }),
 });
 
 type FormData = z.infer<typeof formSchema>;
 
-export default function SignIn() {
+export default function SignUp() {
   const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
 
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
     defaultValues: {
+      name: "",
       email: "",
       password: "",
-      rememberMe: false,
+      terms: false,
     },
   });
 
   const onSubmit: SubmitHandler<FormData> = async (data) => {
     try {
-      console.log("Sign in:", data);
+      console.log("Sign up:", data);
       // Handle form submission here
-      // Example: await signIn(data.email, data.password, data.rememberMe);
+      // Example: await signUp(data.name, data.email, data.password);
       // On success, navigate to dashboard
       // navigate("/dashboard");
     } catch (error) {
-      console.error("Sign in error:", error);
+      console.error("Sign up error:", error);
       // Handle error (show toast, etc.)
     }
   };
 
-  const handleGoogleSignIn = () => {
-    console.log("Google sign in");
+  const handleGoogleSignUp = () => {
+    console.log("Google sign up");
     // Handle Google OAuth here
     // Example: window.location.href = "/auth/google";
   };
@@ -90,12 +94,8 @@ export default function SignIn() {
     navigate("/");
   };
 
-  const handleSignUpClick = () => {
-    navigate("/signup");
-  };
-
-  const handleForgotPassword = () => {
-    navigate("/forgot-password");
+  const handleSignInClick = () => {
+    navigate("/signin");
   };
 
   return (
@@ -123,24 +123,24 @@ export default function SignIn() {
         <div className="max-w-md mx-auto">
           {/* Header */}
           <div className="text-center mb-8">
-            <h1 className="text-3xl font-bold mb-2">Welcome back</h1>
+            <h1 className="text-3xl font-bold mb-2">Create your account</h1>
             <p className="text-muted-foreground">
-              Sign in to your AIdeas account to continue creating
+              Join AIdeas to start creating and collaborating
             </p>
           </div>
 
-          {/* Sign In Card */}
+          {/* Sign Up Card */}
           <Card>
             <CardHeader>
-              <CardTitle className="text-center">Sign In</CardTitle>
+              <CardTitle className="text-center">Sign Up</CardTitle>
             </CardHeader>
             <CardContent className="space-y-6">
-              {/* Social Sign In */}
+              {/* Social Sign Up */}
               <div className="space-y-3">
                 <Button
                   variant="outline"
                   className="w-full gap-2"
-                  onClick={handleGoogleSignIn}
+                  onClick={handleGoogleSignUp}
                 >
                   <svg
                     className="h-4 w-4"
@@ -162,14 +162,36 @@ export default function SignIn() {
                 </div>
                 <div className="relative flex justify-center text-xs uppercase">
                   <span className="bg-background px-2 text-muted-foreground">
-                    Or continue with email
+                    Or sign up with email
                   </span>
                 </div>
               </div>
 
-              {/* Email/Password Form */}
+              {/* Sign Up Form */}
               <Form {...form}>
                 <div className="space-y-4">
+                  <FormField
+                    control={form.control}
+                    name="name"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Full Name</FormLabel>
+                        <FormControl>
+                          <div className="relative">
+                            <User className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                            <Input
+                              type="text"
+                              placeholder="Enter your full name"
+                              className="pl-10"
+                              {...field}
+                            />
+                          </div>
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
                   <FormField
                     control={form.control}
                     name="email"
@@ -202,7 +224,7 @@ export default function SignIn() {
                           <div className="relative">
                             <Input
                               type={showPassword ? "text" : "password"}
-                              placeholder="Enter your password"
+                              placeholder="Create a password"
                               className="pr-10"
                               {...field}
                             />
@@ -226,59 +248,67 @@ export default function SignIn() {
                     )}
                   />
 
-                  <div className="flex items-center justify-between">
-                    <FormField
-                      control={form.control}
-                      name="rememberMe"
-                      render={({ field }) => (
-                        <FormItem className="flex flex-row items-center space-x-1 space-y-0">
-                          <FormControl>
-                            <Checkbox
-                              checked={field.value}
-                              onCheckedChange={field.onChange}
-                              className="cursor-pointer"
-                            />
-                          </FormControl>
-                          <div className="space-y-1 leading-none">
-                            <FormLabel className="text-sm font-normal cursor-pointer">
-                              Remember me
-                            </FormLabel>
-                          </div>
-                        </FormItem>
-                      )}
-                    />
-                    <Button
-                      variant="link"
-                      className="px-0 text-sm"
-                      type="button"
-                      onClick={handleForgotPassword}
-                    >
-                      Forgot password?
-                    </Button>
-                  </div>
+                  <FormField
+                    control={form.control}
+                    name="terms"
+                    render={({ field }) => (
+                      <FormItem className="flex flex-row items-start space-x-2 space-y-0">
+                        <FormControl>
+                          <Checkbox
+                            checked={field.value}
+                            onCheckedChange={field.onChange}
+                            className="mt-1 cursor-pointer"
+                          />
+                        </FormControl>
+                        <div className="space-y-1 leading-none">
+                          <FormLabel className="text-sm font-normal cursor-pointer">
+                            I agree to the{" "}
+                            <Button
+                              variant="link"
+                              className="px-0 text-sm h-auto"
+                              type="button"
+                            >
+                              Terms of Service
+                            </Button>{" "}
+                            and{" "}
+                            <Button
+                              variant="link"
+                              className="px-0 text-sm h-auto"
+                              type="button"
+                            >
+                              Privacy Policy
+                            </Button>
+                          </FormLabel>
+                          <FormMessage />
+                        </div>
+                      </FormItem>
+                    )}
+                  />
 
                   <Button
                     onClick={form.handleSubmit(onSubmit)}
                     className="w-full"
                     disabled={form.formState.isSubmitting}
                   >
-                    {form.formState.isSubmitting ? "Signing in..." : "Sign In"}
+                    {form.formState.isSubmitting
+                      ? "Creating account..."
+                      : "Create Account"}
                   </Button>
                 </div>
               </Form>
             </CardContent>
           </Card>
 
-          {/* Sign Up Link */}
+          {/* Sign In Link */}
           <div className="text-center mt-6">
             <p className="text-sm text-muted-foreground">
-              Don't have an account?{" "}
+              Already have an account?{" "}
               <Button
                 variant="link"
                 className="px-0 text-sm"
-                onClick={handleSignUpClick}
+                onClick={handleSignInClick}
               >
-                Sign up for free
+                Sign in
               </Button>
             </p>
           </div>
@@ -286,7 +316,7 @@ export default function SignIn() {
           {/* Footer */}
           <div className="text-center mt-8 pt-6 border-t">
             <p className="text-xs text-muted-foreground">
-              By signing in, you agree to our{" "}
+              By creating an account, you agree to our{" "}
               <Button variant="link" className="px-0 text-xs h-auto">
                 Terms of Service
               </Button>{" "}

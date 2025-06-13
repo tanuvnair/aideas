@@ -14,10 +14,10 @@ import {
   Shield,
 } from "lucide-react";
 import { useEffect, useState } from "react";
-
-import type { Route } from "../+types/root";
 import { useNavigate } from "react-router";
 import { ThemeToggle } from "~/components/theme-toggle";
+
+import type { Route } from "../+types/root";
 
 export const meta: Route.MetaFunction = () => {
   return [
