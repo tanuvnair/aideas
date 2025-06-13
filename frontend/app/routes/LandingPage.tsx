@@ -1,18 +1,14 @@
+import { useTheme } from "@/lib/useTheme";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardHeader,
-  CardTitle,
-  CardDescription,
-  CardContent,
-} from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Separator } from "@/components/ui/separator";
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Moon, Sun } from "lucide-react";
 
 export default function LandingPage() {
+  const { theme, toggleTheme } = useTheme();
+
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen text-foreground">
       <nav className="flex items-center justify-between p-6">
         <div className="flex items-center gap-2">
           <svg
@@ -31,21 +27,34 @@ export default function LandingPage() {
           </svg>
           <span className="text-lg font-semibold">AIdeas</span>
         </div>
+
         <div className="flex items-center gap-4">
           <Button variant="ghost">Features</Button>
           <Button>Get Started</Button>
+          <Button variant="ghost" onClick={toggleTheme} className=" ">
+            {theme === "dark" ? (
+              <Sun className="h-5 w-5" />
+            ) : (
+              <Moon className="h-5 w-5" />
+            )}
+          </Button>
         </div>
       </nav>
 
-      <section className="container mx-auto px-6 py-20 text-center">
-        <Badge className="mb-4">AI-Powered</Badge>
-        <h1 className="text-4xl font-bold tracking-tight mb-6">
-          Sketch. Note. Create.
-        </h1>
-        <p className="text-lg text-muted-foreground max-w-2xl mx-auto mb-10">
+      <section className="container mx-auto px-6 py-24 text-center space-y-6">
+        <Badge>AI-Powered</Badge>
+        <div className="space-y-2">
+          <h1 className="text-4xl font-bold tracking-tight">
+            Welcome to AIdeas
+          </h1>
+          <h2 className="text-2xl font-medium tracking-tight">
+            Sketch. Note. Create.
+          </h2>
+        </div>
+        <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
           The minimalist drawing and note-taking app enhanced with AI.
         </p>
-        <div className="flex justify-center gap-4">
+        <div className="flex justify-center gap-4 pt-4">
           <Button size="lg">Start Creating</Button>
           <Button size="lg" variant="outline">
             Learn More
@@ -90,33 +99,6 @@ export default function LandingPage() {
           </Card>
         </div>
       </section>
-
-      <footer className="border-t py-12">
-        <div className="container mx-auto px-6">
-          <div className="flex flex-col md:flex-row justify-between items-center">
-            <div className="flex items-center gap-2 mb-4 md:mb-0">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                className="h-6 w-6"
-              >
-                <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
-                <path d="M15 14l5 5" />
-                <path d="M20 14l-5 5" />
-              </svg>
-              <span className="font-medium">AIdeas</span>
-            </div>
-            <div className="text-sm text-muted-foreground">
-              © {new Date().getFullYear()} AIdeas. All rights reserved.
-            </div>
-          </div>
-        </div>
-      </footer>
     </div>
   );
 }
