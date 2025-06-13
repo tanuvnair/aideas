@@ -102,7 +102,10 @@ export default function SignUp() {
     <div className="min-h-screen text-foreground">
       {/* Navigation */}
       <nav className="flex items-center justify-between p-6 border-b">
-        <div className="flex items-center gap-2">
+        <div
+          className="flex items-center gap-2 cursor-pointer"
+          onClick={() => navigate("/")}
+        >
           <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
             <Brain className="h-4 w-4 text-primary-foreground" />
           </div>
