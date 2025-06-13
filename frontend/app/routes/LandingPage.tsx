@@ -31,20 +31,7 @@ export default function LandingPage() {
     <div className="min-h-screen text-foreground">
       <nav className="flex items-center justify-between p-6">
         <div className="flex items-center gap-2">
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            className="h-6 w-6"
-          >
-            <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
-            <path d="M15 14l5 5" />
-            <path d="M20 14l-5 5" />
-          </svg>
+          <img src="../favicon.ico" className="h-8 w-8" alt="AIdeas Logo" />
           <span className="text-lg font-semibold">AIdeas</span>
         </div>
 
