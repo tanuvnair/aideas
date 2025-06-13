@@ -211,11 +211,12 @@ export default function SignIn() {
                       control={form.control}
                       name="rememberMe"
                       render={({ field }) => (
-                        <FormItem className="flex flex-row items-start space-x-3 space-y-0">
+                        <FormItem className="flex flex-row items-center space-x-1 space-y-0">
                           <FormControl>
                             <Checkbox
                               checked={field.value}
                               onCheckedChange={field.onChange}
+                              className="cursor-pointer"
                             />
                           </FormControl>
                           <div className="space-y-1 leading-none">
