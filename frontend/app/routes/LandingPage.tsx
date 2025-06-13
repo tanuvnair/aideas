@@ -70,6 +70,9 @@ export default function LandingPage() {
     };
   }, [showScrollButton]);
 
+  const handleSignInClick = () => () => navigate("/signin");
+  const handleSignUpClick = () => () => navigate("/signup");
+
   return (
     <div className="min-h-screen text-foreground relative">
       <nav className="flex items-center justify-between p-6 border-b sticky top-0 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 z-50">
@@ -81,15 +84,10 @@ export default function LandingPage() {
         </div>
 
         <div className="flex items-center gap-4">
-          <Button
-            variant="outline"
-            onClick={() => {
-              navigate("/signin");
-            }}
-          >
+          <Button variant="outline" onClick={handleSignInClick()}>
             Sign In
           </Button>
-          <Button>Sign Up</Button>
+          <Button onClick={handleSignUpClick()}>Sign Up</Button>
           <ThemeToggle />
         </div>
       </nav>
@@ -116,7 +114,7 @@ export default function LandingPage() {
           </p>
 
           <div className="flex flex-col sm:flex-row justify-center gap-4 pt-4">
-            <Button size="lg" className="gap-2">
+            <Button size="lg" className="gap-2" onClick={handleSignUpClick()}>
               <Zap className="h-4 w-4" />
               Start Creating
             </Button>
