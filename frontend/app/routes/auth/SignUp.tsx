@@ -267,6 +267,7 @@ export default function SignUp() {
                               variant="link"
                               className="px-0 text-sm h-auto"
                               type="button"
+                              onClick={() => navigate("/terms-of-service")}
                             >
                               Terms of Service
                             </Button>{" "}
@@ -275,6 +276,7 @@ export default function SignUp() {
                               variant="link"
                               className="px-0 text-sm h-auto"
                               type="button"
+                              onClick={() => navigate("/privacy-policy")}
                             >
                               Privacy Policy
                             </Button>
@@ -317,11 +319,19 @@ export default function SignUp() {
           <div className="text-center mt-8 pt-6 border-t">
             <p className="text-xs text-muted-foreground">
               By creating an account, you agree to our{" "}
-              <Button variant="link" className="px-0 text-xs h-auto">
+              <Button
+                variant="link"
+                className="px-0 text-xs h-auto"
+                onClick={() => navigate("/terms-of-service")}
+              >
                 Terms of Service
               </Button>{" "}
               and{" "}
-              <Button variant="link" className="px-0 text-xs h-auto">
+              <Button
+                variant="link"
+                className="px-0 text-xs h-auto"
+                onClick={() => navigate("/privacy-policy")}
+              >
                 Privacy Policy
               </Button>
             </p>

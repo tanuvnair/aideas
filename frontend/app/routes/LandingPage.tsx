@@ -84,10 +84,10 @@ export default function LandingPage() {
         </div>
 
         <div className="flex items-center gap-4">
-          <Button variant="outline" onClick={handleSignInClick()}>
+          <Button variant="outline" onClick={() => navigate("/signin")}>
             Sign In
           </Button>
-          <Button onClick={handleSignUpClick()}>Sign Up</Button>
+          <Button onClick={() => navigate("/signup")}>Sign Up</Button>
           <ThemeToggle />
         </div>
       </nav>
@@ -114,7 +114,11 @@ export default function LandingPage() {
           </p>
 
           <div className="flex flex-col sm:flex-row justify-center gap-4 pt-4">
-            <Button size="lg" className="gap-2" onClick={handleSignUpClick()}>
+            <Button
+              size="lg"
+              className="gap-2"
+              onClick={() => navigate("/signin")}
+            >
               <Zap className="h-4 w-4" />
               Start Creating
             </Button>
@@ -250,12 +254,20 @@ export default function LandingPage() {
               <h4 className="font-semibold mb-4">Legal</h4>
               <ul className="space-y-2 text-sm text-muted-foreground">
                 <li>
-                  <Button variant="link" className="p-0 h-auto">
+                  <Button
+                    variant="link"
+                    className="p-0 h-auto"
+                    onClick={() => navigate("/terms-of-service")}
+                  >
                     Terms Of Service
                   </Button>
                 </li>
                 <li>
-                  <Button variant="link" className="p-0 h-auto">
+                  <Button
+                    variant="link"
+                    className="p-0 h-auto"
+                    onClick={() => navigate("/privacy-policy")}
+                  >
                     Privacy Policy
                   </Button>
                 </li>
@@ -266,12 +278,20 @@ export default function LandingPage() {
               <h4 className="font-semibold mb-4">Support</h4>
               <ul className="space-y-2 text-sm text-muted-foreground">
                 <li>
-                  <Button variant="link" className="p-0 h-auto">
+                  <Button
+                    variant="link"
+                    className="p-0 h-auto"
+                    onClick={() => navigate("/help-center")}
+                  >
                     Help Center
                   </Button>
                 </li>
                 <li>
-                  <Button variant="link" className="p-0 h-auto">
+                  <Button
+                    variant="link"
+                    className="p-0 h-auto"
+                    onClick={() => navigate("/contact")}
+                  >
                     Contact
                   </Button>
                 </li>
