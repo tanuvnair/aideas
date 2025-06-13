@@ -133,7 +133,12 @@ export default function SignIn() {
 
                 <div className="flex items-center justify-between">
                   <div className="flex items-center space-x-2">
-                    <Checkbox id="remember" checked={rememberMe} />
+                    <Checkbox
+                      id="remember"
+                      checked={rememberMe}
+                      onClick={() => setRememberMe(!rememberMe)}
+                      className="cursor-pointer"
+                    />
                     <Label
                       htmlFor="remember"
                       className="text-sm font-normal cursor-pointer"

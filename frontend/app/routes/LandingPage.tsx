@@ -56,6 +56,20 @@ export default function LandingPage() {
     });
   };
 
+  useEffect(() => {
+    const handleScroll = () => {
+      checkScrollTop();
+    };
+
+    // Add event listener
+    window.addEventListener("scroll", handleScroll);
+
+    // Cleanup function to remove event listener
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+    };
+  }, [showScrollButton]);
+
   return (
     <div className="min-h-screen text-foreground relative">
       <nav className="flex items-center justify-between p-6 border-b sticky top-0 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 z-50">
