@@ -117,7 +117,7 @@ export default function LandingPage() {
             <Button
               size="lg"
               className="gap-2"
-              onClick={() => navigate("/signin")}
+              onClick={() => navigate("/signup")}
             >
               <Zap className="h-4 w-4" />
               Start Creating

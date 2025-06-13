@@ -111,10 +111,10 @@ export default function SignIn() {
         <Button
           variant="ghost"
           className="flex items-center gap-2"
-          onClick={handleBackToHome}
+          onClick={() => navigate(-1)}
         >
           <ArrowLeft className="h-4 w-4" />
-          Back to Home
+          Go Back
         </Button>
       </nav>
 
