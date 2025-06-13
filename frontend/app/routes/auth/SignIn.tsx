@@ -20,6 +20,7 @@ import * as z from "zod";
 import { useNavigate } from "react-router";
 
 import type { Route } from "../../+types/root";
+import { supabase } from "~/lib/supabase";
 
 export const meta: Route.MetaFunction = () => {
   return [
@@ -69,11 +70,16 @@ export default function SignIn() {
 
   const onSubmit: SubmitHandler<FormData> = async (data) => {
     try {
+      const email = data.email.trim().toLowerCase();
+      const password = data.password;
+
       console.log("Sign in:", data);
-      // Handle form submission here
-      // Example: await signIn(data.email, data.password, data.rememberMe);
-      // On success, navigate to dashboard
-      // navigate("/dashboard");
+      await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+
+      navigate("/dashboard");
     } catch (error) {
       console.error("Sign in error:", error);
       // Handle error (show toast, etc.)
@@ -84,18 +90,6 @@ export default function SignIn() {
     console.log("Google sign in");
     // Handle Google OAuth here
     // Example: window.location.href = "/auth/google";
-  };
-
-  const handleBackToHome = () => {
-    navigate("/");
-  };
-
-  const handleSignUpClick = () => {
-    navigate("/signup");
-  };
-
-  const handleForgotPassword = () => {
-    navigate("/forgot-password");
   };
 
   return (
@@ -254,7 +248,7 @@ export default function SignIn() {
                       variant="link"
                       className="px-0 text-sm"
                       type="button"
-                      onClick={handleForgotPassword}
+                      onClick={() => navigate("/forgot-password")}
                     >
                       Forgot password?
                     </Button>
@@ -279,7 +273,7 @@ export default function SignIn() {
               <Button
                 variant="link"
                 className="px-0 text-sm"
-                onClick={handleSignUpClick}
+                onClick={() => navigate("/signup")}
               >
                 Sign up for free
               </Button>
