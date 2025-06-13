@@ -4,6 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import {
   Form,
   FormControl,
@@ -12,7 +13,16 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { Brain, Eye, EyeOff, Mail, User, ArrowLeft } from "lucide-react";
+import {
+  Brain,
+  Eye,
+  EyeOff,
+  Mail,
+  User,
+  ArrowLeft,
+  AlertCircle,
+  CheckCircle,
+} from "lucide-react";
 import { useState } from "react";
 import { useForm, type SubmitHandler } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -61,6 +71,8 @@ type FormData = z.infer<typeof formSchema>;
 export default function SignUp() {
   const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
+  const [authError, setAuthError] = useState<string | null>(null);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
@@ -74,31 +86,62 @@ export default function SignUp() {
 
   const onSubmit: SubmitHandler<FormData> = async (data) => {
     try {
+      // Clear any previous errors and success messages
+      setAuthError(null);
+      setSuccessMessage(null);
+
       console.log("Sign up:", data);
       const email = data.email.trim().toLowerCase();
       const password = data.password;
 
-      supabase.auth.signUp({
+      const { error } = await supabase.auth.signUp({
         email,
         password,
         options: {
           emailRedirectTo: `${import.meta.env.VITE_FRONTEND_URL}/dashboard`,
+          data: {
+            name: data.name,
+          },
         },
       });
+
+      if (error) {
+        setAuthError(error.message);
+        return;
+      }
+
+      // Success - show success message
+      setSuccessMessage(
+        "Account created successfully! Please check your email to confirm your account before signing in. If you don't see the email, check your spam folder."
+      );
+      console.log("Sign up successful");
     } catch (error) {
       console.error("Sign up error:", error);
-      // Handle error (show toast, etc.)
+      setAuthError("An unexpected error occurred. Please try again.");
     }
   };
 
   const handleGoogleSignUp = async () => {
-    console.log("Google sign up");
-    await supabase.auth.signInWithOAuth({
-      provider: "google",
-      options: {
-        redirectTo: `${import.meta.env.VITE_FRONTEND_URL}/dashboard`,
-      },
-    });
+    try {
+      // Clear any previous errors and success messages
+      setAuthError(null);
+      setSuccessMessage(null);
+
+      console.log("Google sign up");
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: "google",
+        options: {
+          redirectTo: `${import.meta.env.VITE_FRONTEND_URL}/dashboard`,
+        },
+      });
+
+      if (error) {
+        setAuthError(error.message);
+      }
+    } catch (error) {
+      console.error("Google sign up error:", error);
+      setAuthError("An unexpected error occurred. Please try again.");
+    }
   };
 
   return (
@@ -134,6 +177,27 @@ export default function SignUp() {
               Join AIdeas to start creating and collaborating
             </p>
           </div>
+
+          {/* Error Alert */}
+          {authError && (
+            <Alert variant="destructive" className="mb-6">
+              <AlertCircle className="h-4 w-4" />
+              <AlertDescription>{authError}</AlertDescription>
+            </Alert>
+          )}
+
+          {/* Success Alert */}
+          {successMessage && (
+            <Alert
+              variant="default"
+              className="mb-6 border-green-200 bg-green-50 text-green-800"
+            >
+              <CheckCircle className="h-4 w-4 text-green-600" />
+              <AlertDescription className="text-green-800">
+                {successMessage}
+              </AlertDescription>
+            </Alert>
+          )}
 
           {/* Sign Up Card */}
           <Card>
