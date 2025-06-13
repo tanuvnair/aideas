@@ -1,77 +1,9 @@
 import express from "express";
 import supabase from "../lib/supabase.js";
+import authenticateUser from "../middleware/authMiddleware.js";
+import validateIdeaData from "../middleware/ideaMiddleware.js";
 
 const router = express.Router();
-
-// Middleware to extract and validate auth token
-const authenticateUser = async (req, res, next) => {
-  try {
-    const authHeader = req.headers.authorization;
-
-    if (!authHeader) {
-      return res.status(401).json({
-        error: "Authorization header missing",
-        message: "Please provide a valid authorization token",
-      });
-    }
-
-    if (!authHeader.startsWith("Bearer ")) {
-      return res.status(401).json({
-        error: "Invalid authorization format",
-        message: "Authorization header must be in format: Bearer <token>",
-      });
-    }
-
-    const token = authHeader.split(" ")[1];
-
-    if (!token) {
-      return res.status(401).json({
-        error: "Token missing",
-        message: "No token provided in authorization header",
-      });
-    }
-
-    const {
-      data: { user },
-      error: userError,
-    } = await supabase.auth.getUser(token);
-
-    if (userError) {
-      return res.status(401).json({
-        error: "Authentication failed",
-        message: "Invalid or expired token",
-        details: userError.message,
-      });
-    }
-
-    if (!user) {
-      return res.status(401).json({
-        error: "User not found",
-        message: "No user associated with this token",
-      });
-    }
-
-    req.user = user;
-    next();
-  } catch (error) {
-    console.error("Authentication error:", error);
-    return res.status(500).json({
-      error: "Internal server error",
-      message: "An error occurred during authentication",
-    });
-  }
-};
-
-// Basic validation middleware
-const validateIdeaData = (req, res, next) => {
-  const { title } = req.body;
-
-  if (!title) {
-    return res.status(400).json({ error: "Title is required" });
-  }
-
-  next();
-};
 
 // CREATE idea
 router.post("/", authenticateUser, validateIdeaData, async (req, res) => {
@@ -142,6 +74,57 @@ router.get("/", authenticateUser, async (req, res) => {
       message: "An unexpected error occurred while fetching ideas",
     });
   }
+});
+
+// SEARCH/FILTER ideas
+router.get("/search", async (req, res) => {
+  const { query } = req.query;
+  const authHeader = req.headers.authorization;
+
+  if (!authHeader) {
+    return res.status(401).json({
+      error: "Missing token",
+      message: "Authorization header is required",
+    });
+  }
+
+  const token = authHeader.split(" ")[1];
+
+  const {
+    data: { user },
+    error: userError,
+  } = await supabase.auth.getUser(token);
+
+  if (userError || !user) {
+    return res.status(401).json({
+      error: "Invalid or expired token",
+      message: "Unable to authenticate user",
+      details: userError?.message,
+    });
+  }
+
+  let supabaseQuery = supabase.from("ideas").select("*").eq("user_id", user.id);
+
+  if (query) {
+    supabaseQuery = supabaseQuery.ilike("title", `%${query}%`);
+  }
+
+  const { data, error } = await supabaseQuery;
+
+  if (error) {
+    console.error("Database error fetching ideas:", error);
+    return res.status(400).json({
+      error: "Failed to fetch ideas",
+      message: "Unable to retrieve ideas from database",
+      details: error.message,
+    });
+  }
+
+  res.status(200).json({
+    message:
+      data.length === 0 ? "No ideas found" : "Ideas retrieved successfully",
+    data: data,
+  });
 });
 
 // GET specific idea by ID

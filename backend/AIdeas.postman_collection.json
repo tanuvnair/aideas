@@ -8,112 +8,288 @@
 	"item": [
 		{
 			"name": "Auth",
-			"item": []
+			"item": [
+				{
+					"name": "Sign Up",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"tanuvnair@gmail.com\",\n    \"password\": \"$Tanuv122131233$\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{URL}}:{{PORT}}/auth/signup",
+							"host": [
+								"{{URL}}"
+							],
+							"port": "{{PORT}}",
+							"path": [
+								"auth",
+								"signup"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Sign In",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const response = pm.response.json();",
+									"",
+									"// Check if the access_token exists in the response",
+									"pm.expect(response.session).to.have.property('access_token');",
+									"",
+									"// Set the access_token as a collection variable",
+									"pm.collectionVariables.set('BEARER_TOKEN', response.session.access_token);"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"tanuvnair@gmail.com\",\n    \"password\": \"$Tanuv122131233$\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{URL}}:{{PORT}}/auth/signin",
+							"host": [
+								"{{URL}}"
+							],
+							"port": "{{PORT}}",
+							"path": [
+								"auth",
+								"signin"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Sign Out",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"tanuvnair@gmail.com\",\n    \"password\": \"$Tanuv122131233$\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{URL}}:{{PORT}}/auth/signout",
+							"host": [
+								"{{URL}}"
+							],
+							"port": "{{PORT}}",
+							"path": [
+								"auth",
+								"signout"
+							]
+						}
+					},
+					"response": []
+				}
+			]
 		},
 		{
 			"name": "Ideas",
-			"item": []
-		},
-		{
-			"name": "Sign Up",
-			"request": {
-				"method": "POST",
-				"header": [],
-				"body": {
-					"mode": "raw",
-					"raw": "{\n    \"email\": \"tanuvnair@gmail.com\",\n    \"password\": \"$Tanuv122131233$\"\n}",
-					"options": {
-						"raw": {
-							"language": "json"
-						}
-					}
-				},
-				"url": {
-					"raw": "{{URL}}:{{PORT}}/auth/signup",
-					"host": [
-						"{{URL}}"
-					],
-					"port": "{{PORT}}",
-					"path": [
-						"auth",
-						"signup"
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "Sign In",
-			"event": [
+			"item": [
 				{
-					"listen": "test",
-					"script": {
-						"exec": [
-							"const response = pm.response.json();",
-							"",
-							"// Check if the access_token exists in the response",
-							"pm.expect(response.session).to.have.property('access_token');",
-							"",
-							"// Set the access_token as a collection variable",
-							"pm.collectionVariables.set('BEARER_TOKEN', response.session.access_token);"
-						],
-						"type": "text/javascript",
-						"packages": {}
-					}
-				}
-			],
-			"request": {
-				"method": "POST",
-				"header": [],
-				"body": {
-					"mode": "raw",
-					"raw": "{\n    \"email\": \"tanuvnair@gmail.com\",\n    \"password\": \"$Tanuv122131233$\"\n}",
-					"options": {
-						"raw": {
-							"language": "json"
+					"name": "Create Idea",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"title\": \"Math 2\",\n    \"content\": [\n        {\n            \"type\": \"rect\",\n            \"x\": 10,\n            \"y\": 20,\n            \"width\": 100,\n            \"height\": 50,\n            \"color\": \"blue\"\n        },\n        {\n            \"type\": \"circle\",\n            \"x\": 200,\n            \"y\": 120,\n            \"radius\": 40,\n            \"color\": \"red\"\n        }\n    ]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{URL}}:{{PORT}}/ideas",
+							"host": [
+								"{{URL}}"
+							],
+							"port": "{{PORT}}",
+							"path": [
+								"ideas"
+							]
 						}
-					}
+					},
+					"response": []
 				},
-				"url": {
-					"raw": "{{URL}}:{{PORT}}/auth/signin",
-					"host": [
-						"{{URL}}"
-					],
-					"port": "{{PORT}}",
-					"path": [
-						"auth",
-						"signin"
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "Create Idea",
-			"request": {
-				"method": "POST",
-				"header": [],
-				"body": {
-					"mode": "raw",
-					"raw": "{\n    \"title\": \"History\",\n    \"content\": [\n        {\n            \"type\": \"rect\",\n            \"x\": 10,\n            \"y\": 20,\n            \"width\": 100,\n            \"height\": 50,\n            \"color\": \"blue\"\n        },\n        {\n            \"type\": \"circle\",\n            \"x\": 200,\n            \"y\": 120,\n            \"radius\": 40,\n            \"color\": \"red\"\n        }\n    ]\n}",
-					"options": {
-						"raw": {
-							"language": "json"
+				{
+					"name": "Get Ideas",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{URL}}:{{PORT}}/ideas",
+							"host": [
+								"{{URL}}"
+							],
+							"port": "{{PORT}}",
+							"path": [
+								"ideas"
+							]
 						}
-					}
+					},
+					"response": []
 				},
-				"url": {
-					"raw": "{{URL}}:{{PORT}}/ideas",
-					"host": [
-						"{{URL}}"
-					],
-					"port": "{{PORT}}",
-					"path": [
-						"ideas"
-					]
+				{
+					"name": "Get Idea By Id",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{URL}}:{{PORT}}/ideas/47",
+							"host": [
+								"{{URL}}"
+							],
+							"port": "{{PORT}}",
+							"path": [
+								"ideas",
+								"47"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Search Idea",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{URL}}:{{PORT}}/ideas/search?query=Math",
+							"host": [
+								"{{URL}}"
+							],
+							"port": "{{PORT}}",
+							"path": [
+								"ideas",
+								"search"
+							],
+							"query": [
+								{
+									"key": "query",
+									"value": "Math"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Idea",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"content\": [\n    {\n        \"x\": 20,\n        \"y\": 333\n    }\n  ]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{URL}}:{{PORT}}/ideas/42",
+							"host": [
+								"{{URL}}"
+							],
+							"port": "{{PORT}}",
+							"path": [
+								"ideas",
+								"42"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Idea",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{URL}}:{{PORT}}/ideas/42",
+							"host": [
+								"{{URL}}"
+							],
+							"port": "{{PORT}}",
+							"path": [
+								"ideas",
+								"42"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Search Idea",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{URL}}:{{PORT}}/ideas/search?query=Math",
+							"host": [
+								"{{URL}}"
+							],
+							"port": "{{PORT}}",
+							"path": [
+								"ideas",
+								"search"
+							],
+							"query": [
+								{
+									"key": "query",
+									"value": "Math"
+								}
+							]
+						}
+					},
+					"response": []
 				}
-			},
-			"response": []
+			]
 		}
 	],
 	"auth": {
