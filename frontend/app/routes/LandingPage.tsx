@@ -2,7 +2,8 @@ import { useTheme } from "@/lib/useTheme";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Moon, Sun } from "lucide-react";
+import { Moon, Sun, ArrowUp } from "lucide-react"; // Added ArrowUp icon
+import { useEffect, useState } from "react"; // Added useState and useEffect
 
 import type { Route } from "../+types/root";
 
@@ -26,9 +27,32 @@ export const meta: Route.MetaFunction = () => {
 
 export default function LandingPage() {
   const { theme, toggleTheme } = useTheme();
+  const [showScrollButton, setShowScrollButton] = useState(false);
+
+  const checkScrollTop = () => {
+    if (!showScrollButton && window.pageYOffset > 400) {
+      setShowScrollButton(true);
+    } else if (showScrollButton && window.pageYOffset <= 400) {
+      setShowScrollButton(false);
+    }
+  };
+
+  const scrollToTop = () => {
+    window.scrollTo({
+      top: 0,
+      behavior: "smooth",
+    });
+  };
+
+  useEffect(() => {
+    window.addEventListener("scroll", checkScrollTop);
+    return () => window.removeEventListener("scroll", checkScrollTop);
+  }, [showScrollButton]);
 
   return (
-    <div className="min-h-screen text-foreground">
+    <div className="min-h-screen text-foreground relative">
+      {" "}
+      {/* Added relative */}
       <nav className="flex items-center justify-between p-6">
         <div className="flex items-center gap-2">
           <img src="../favicon.ico" className="h-8 w-8" alt="AIdeas Logo" />
@@ -47,8 +71,7 @@ export default function LandingPage() {
           </Button>
         </div>
       </nav>
-
-      <section className="container mx-auto px-6 py-24 text-center space-y-6">
+      <section className="container mx-auto px-6 h-screen flex flex-col justify-center items-center text-center space-y-6">
         <Badge>AI-Powered</Badge>
         <div className="space-y-2">
           <h1 className="text-4xl font-bold tracking-tight">
@@ -63,13 +86,24 @@ export default function LandingPage() {
         </p>
         <div className="flex justify-center gap-4 pt-4">
           <Button size="lg">Start Creating</Button>
-          <Button size="lg" variant="outline">
+          <Button
+            size="lg"
+            variant="outline"
+            onClick={() => {
+              const element = document.getElementById("how-it-works");
+              if (element) {
+                element.scrollIntoView({ behavior: "smooth" });
+              }
+            }}
+          >
             Learn More
           </Button>
         </div>
       </section>
-
-      <section className="container mx-auto px-6 py-16">
+      <section
+        className="container mx-auto px-6 h-screen flex flex-col justify-center"
+        id="how-it-works"
+      >
         <h2 className="text-3xl font-bold text-center mb-12">How It Works</h2>
         <div className="grid md:grid-cols-3 gap-8">
           <Card>
@@ -106,6 +140,16 @@ export default function LandingPage() {
           </Card>
         </div>
       </section>
+      {/* Back to Top Button */}
+      {showScrollButton && (
+        <Button
+          onClick={scrollToTop}
+          className="fixed bottom-6 right-6 w-16 h-16 p-0"
+          variant="outline"
+        >
+          <ArrowUp className="h-5 w-5" />
+        </Button>
+      )}
     </div>
   );
 }
