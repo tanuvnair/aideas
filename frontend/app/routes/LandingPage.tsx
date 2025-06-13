@@ -51,8 +51,6 @@ export default function LandingPage() {
 
   return (
     <div className="min-h-screen text-foreground relative">
-      {" "}
-      {/* Added relative */}
       <nav className="flex items-center justify-between p-6">
         <div className="flex items-center gap-2">
           <img src="../favicon.ico" className="h-8 w-8" alt="AIdeas Logo" />
@@ -71,6 +69,7 @@ export default function LandingPage() {
           </Button>
         </div>
       </nav>
+
       <section className="container mx-auto px-6 h-screen flex flex-col justify-center items-center text-center space-y-6">
         <Badge>AI-Powered</Badge>
         <div className="space-y-2">
@@ -100,6 +99,7 @@ export default function LandingPage() {
           </Button>
         </div>
       </section>
+
       <section
         className="container mx-auto px-6 h-screen flex flex-col justify-center"
         id="how-it-works"
@@ -140,6 +140,7 @@ export default function LandingPage() {
           </Card>
         </div>
       </section>
+
       {/* Back to Top Button */}
       {showScrollButton && (
         <Button
