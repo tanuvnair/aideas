@@ -4,6 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import {
   Form,
   FormControl,
@@ -12,7 +13,7 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { Brain, Eye, EyeOff, Mail, ArrowLeft } from "lucide-react";
+import { Brain, Eye, EyeOff, Mail, ArrowLeft, AlertCircle } from "lucide-react";
 import { useState } from "react";
 import { useForm, type SubmitHandler } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -58,6 +59,7 @@ type FormData = z.infer<typeof formSchema>;
 export default function SignIn() {
   const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
+  const [authError, setAuthError] = useState<string | null>(null);
 
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
@@ -70,26 +72,50 @@ export default function SignIn() {
 
   const onSubmit: SubmitHandler<FormData> = async (data) => {
     try {
+      // Clear any previous errors
+      setAuthError(null);
+
       const email = data.email.trim().toLowerCase();
       const password = data.password;
 
       console.log("Sign in:", data);
-      await supabase.auth.signInWithPassword({
+      const { error } = await supabase.auth.signInWithPassword({
         email,
         password,
       });
 
+      if (error) {
+        setAuthError(error.message);
+        return;
+      }
+
       navigate("/dashboard");
     } catch (error) {
       console.error("Sign in error:", error);
-      // Handle error (show toast, etc.)
+      setAuthError("An unexpected error occurred. Please try again.");
     }
   };
 
-  const handleGoogleSignIn = () => {
-    console.log("Google sign in");
-    // Handle Google OAuth here
-    // Example: window.location.href = "/auth/google";
+  const handleGoogleSignIn = async () => {
+    try {
+      // Clear any previous errors
+      setAuthError(null);
+
+      console.log("Google sign in");
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: "google",
+        options: {
+          redirectTo: `${import.meta.env.VITE_FRONTEND_URL}/dashboard`,
+        },
+      });
+
+      if (error) {
+        setAuthError(error.message);
+      }
+    } catch (error) {
+      console.error("Google sign in error:", error);
+      setAuthError("An unexpected error occurred. Please try again.");
+    }
   };
 
   return (
@@ -125,6 +151,14 @@ export default function SignIn() {
               Sign in to your AIdeas account to continue creating
             </p>
           </div>
+
+          {/* Error Alert */}
+          {authError && (
+            <Alert variant="destructive" className="mb-6">
+              <AlertCircle className="h-4 w-4" />
+              <AlertDescription>{authError}</AlertDescription>
+            </Alert>
+          )}
 
           {/* Sign In Card */}
           <Card>

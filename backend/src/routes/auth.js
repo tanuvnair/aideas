@@ -147,55 +147,6 @@ router.post("/signout", async (req, res) => {
   }
 });
 
-router.get("/google", async (req, res) => {
-  try {
-    const { data, error } = await supabase.auth.signInWithOAuth({
-      provider: "google",
-      options: {
-        redirectTo:
-          process.env.GOOGLE_REDIRECT_URL ||
-          "http://localhost:4000/auth/callback",
-      },
-    });
-
-    if (error) {
-      return sendError(res, 400, "OAuth initialization failed", [
-        createError("oauth", "OAUTH_ERROR", error.message),
-      ]);
-    }
-
-    // Redirect to Google OAuth
-    res.redirect(data.url);
-  } catch (err) {
-    sendServerError(res, "Internal server error", err);
-  }
-});
-
-router.get("/callback", (req, res) => {
-  try {
-    const { access_token, refresh_token, error } = req.query;
-
-    if (error) {
-      return res.redirect(
-        `${
-          process.env.FRONTEND_URL || "http://localhost:3000"
-        }/auth/error?message=${encodeURIComponent(error)}`
-      );
-    }
-
-    res.redirect(
-      `${process.env.FRONTEND_URL || "http://localhost:3000"}/auth/success`
-    );
-  } catch (err) {
-    console.error("OAuth callback error:", err);
-    res.redirect(
-      `${
-        process.env.FRONTEND_URL || "http://localhost:3000"
-      }/auth/error?message=callback_error`
-    );
-  }
-});
-
 // Request password reset
 router.post("/forgot-password", async (req, res) => {
   try {

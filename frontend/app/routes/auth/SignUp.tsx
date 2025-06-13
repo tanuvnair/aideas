@@ -17,9 +17,10 @@ import { useState } from "react";
 import { useForm, type SubmitHandler } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { useNavigate } from "react-router";
+import { redirect, useNavigate } from "react-router";
 
 import type { Route } from "../../+types/root";
+import { supabase } from "~/lib/supabase";
 
 export const meta: Route.MetaFunction = () => {
   return [
@@ -74,28 +75,30 @@ export default function SignUp() {
   const onSubmit: SubmitHandler<FormData> = async (data) => {
     try {
       console.log("Sign up:", data);
-      // Handle form submission here
-      // Example: await signUp(data.name, data.email, data.password);
-      // On success, navigate to dashboard
-      // navigate("/dashboard");
+      const email = data.email.trim().toLowerCase();
+      const password = data.password;
+
+      supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          emailRedirectTo: `${import.meta.env.VITE_FRONTEND_URL}/dashboard`,
+        },
+      });
     } catch (error) {
       console.error("Sign up error:", error);
       // Handle error (show toast, etc.)
     }
   };
 
-  const handleGoogleSignUp = () => {
+  const handleGoogleSignUp = async () => {
     console.log("Google sign up");
-    // Handle Google OAuth here
-    // Example: window.location.href = "/auth/google";
-  };
-
-  const handleBackToHome = () => {
-    navigate("/");
-  };
-
-  const handleSignInClick = () => {
-    navigate("/signin");
+    await supabase.auth.signInWithOAuth({
+      provider: "google",
+      options: {
+        redirectTo: `${import.meta.env.VITE_FRONTEND_URL}/dashboard`,
+      },
+    });
   };
 
   return (
@@ -311,7 +314,7 @@ export default function SignUp() {
               <Button
                 variant="link"
                 className="px-0 text-sm"
-                onClick={handleSignInClick}
+                onClick={() => navigate("/signin")}
               >
                 Sign in
               </Button>
