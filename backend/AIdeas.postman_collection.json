@@ -47,10 +47,11 @@
 									"const response = pm.response.json();",
 									"",
 									"// Check if the access_token exists in the response",
-									"pm.expect(response.session).to.have.property('access_token');",
+									"pm.expect(response.data.session).to.have.property('access_token');",
 									"",
 									"// Set the access_token as a collection variable",
-									"pm.collectionVariables.set('BEARER_TOKEN', response.session.access_token);"
+									"pm.collectionVariables.set('BEARER_TOKEN', response.data.session.access_token);",
+									""
 								],
 								"type": "text/javascript",
 								"packages": {}
@@ -135,7 +136,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"title\": \"Math 2\",\n    \"content\": [\n        {\n            \"type\": \"rect\",\n            \"x\": 10,\n            \"y\": 20,\n            \"width\": 100,\n            \"height\": 50,\n            \"color\": \"blue\"\n        },\n        {\n            \"type\": \"circle\",\n            \"x\": 200,\n            \"y\": 120,\n            \"radius\": 40,\n            \"color\": \"red\"\n        }\n    ]\n}",
+							"raw": "{\n    \"title\": \"Math 4412\",\n    \"tags\": [\"Calculus\", \"Algebra\"],\n    \"content\": [\n        {\n            \"type\": \"rect\",\n            \"x\": 10,\n            \"y\": 20,\n            \"width\": 100,\n            \"height\": 50,\n            \"color\": \"blue\"\n        },\n        {\n            \"type\": \"circle\",\n            \"x\": 200,\n            \"y\": 120,\n            \"radius\": 40,\n            \"color\": \"red\"\n        }\n    ]\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -179,14 +180,14 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "{{URL}}:{{PORT}}/ideas/47",
+							"raw": "{{URL}}:{{PORT}}/ideas/54",
 							"host": [
 								"{{URL}}"
 							],
 							"port": "{{PORT}}",
 							"path": [
 								"ideas",
-								"47"
+								"54"
 							]
 						}
 					},
@@ -224,7 +225,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"content\": [\n    {\n        \"x\": 20,\n        \"y\": 333\n    }\n  ]\n}",
+							"raw": "{\n    \"title\": \"Not Maht\",\n    \"tags\": [\"school\", \"homework\"]\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -232,14 +233,14 @@
 							}
 						},
 						"url": {
-							"raw": "{{URL}}:{{PORT}}/ideas/42",
+							"raw": "{{URL}}:{{PORT}}/ideas/54",
 							"host": [
 								"{{URL}}"
 							],
 							"port": "{{PORT}}",
 							"path": [
 								"ideas",
-								"42"
+								"54"
 							]
 						}
 					},
@@ -251,14 +252,14 @@
 						"method": "DELETE",
 						"header": [],
 						"url": {
-							"raw": "{{URL}}:{{PORT}}/ideas/42",
+							"raw": "{{URL}}:{{PORT}}/ideas/54",
 							"host": [
 								"{{URL}}"
 							],
 							"port": "{{PORT}}",
 							"path": [
 								"ideas",
-								"42"
+								"54"
 							]
 						}
 					},

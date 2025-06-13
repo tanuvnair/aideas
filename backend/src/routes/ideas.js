@@ -1,20 +1,34 @@
 import express from "express";
 import supabase from "../lib/supabase.js";
 import authenticateUser from "../middleware/authMiddleware.js";
-import validateIdeaData from "../middleware/ideaMiddleware.js";
+import validateIdeaData, {
+  validateCreateIdea,
+  validateIdeaQuery,
+  validateUpdateIdea,
+} from "../middleware/ideaMiddleware.js";
+import {
+  sendSuccess,
+  sendError,
+  sendValidationError,
+  sendAuthError,
+  sendNotFoundError,
+  sendServerError,
+  createError,
+} from "../utils/responseHelpers.js";
 
 const router = express.Router();
 
 // CREATE idea
-router.post("/", authenticateUser, validateIdeaData, async (req, res) => {
+router.post("/", authenticateUser, validateCreateIdea, async (req, res) => {
   try {
-    const { title, content } = req.body;
+    const { title, tags, content } = req.body;
 
     const { data, error } = await supabase
       .from("ideas")
       .insert([
         {
           title,
+          tags,
           content,
           user_id: req.user.id,
         },
@@ -24,23 +38,24 @@ router.post("/", authenticateUser, validateIdeaData, async (req, res) => {
 
     if (error) {
       console.error("Database error creating idea:", error);
-      return res.status(400).json({
-        error: "Failed to create idea",
-        message: "Unable to save idea to database",
-        details: error.message,
-      });
+      return sendError(res, 400, "Unable to save idea to database", [
+        createError("database", "INSERT_FAILED", error.message),
+      ]);
     }
 
-    res.status(201).json({
-      message: `Idea '${title}' has been created successfully`,
-      data: data,
-    });
+    sendSuccess(
+      res,
+      201,
+      data,
+      `Idea '${title}' has been created successfully`
+    );
   } catch (error) {
     console.error("Unexpected error creating idea:", error);
-    res.status(500).json({
-      error: "Internal server error",
-      message: "An unexpected error occurred while creating the idea",
-    });
+    sendServerError(
+      res,
+      "An unexpected error occurred while creating the idea",
+      error
+    );
   }
 });
 
@@ -55,76 +70,81 @@ router.get("/", authenticateUser, async (req, res) => {
 
     if (error) {
       console.error("Database error fetching ideas:", error);
-      return res.status(400).json({
-        error: "Failed to fetch ideas",
-        message: "Unable to retrieve ideas from database",
-        details: error.message,
-      });
+      return sendError(res, 400, "Unable to retrieve ideas from database", [
+        createError("database", "FETCH_FAILED", error.message),
+      ]);
     }
 
-    res.status(200).json({
-      message: `Found ${data.length} idea${data.length !== 1 ? "s" : ""}`,
-      data: data,
-      count: data.length,
-    });
+    sendSuccess(
+      res,
+      200,
+      data,
+      `Found ${data.length} idea${data.length !== 1 ? "s" : ""}`,
+      { count: data.length }
+    );
   } catch (error) {
     console.error("Unexpected error fetching ideas:", error);
-    res.status(500).json({
-      error: "Internal server error",
-      message: "An unexpected error occurred while fetching ideas",
-    });
+    sendServerError(
+      res,
+      "An unexpected error occurred while fetching ideas",
+      error
+    );
   }
 });
 
 // SEARCH/FILTER ideas
-router.get("/search", async (req, res) => {
-  const { query } = req.query;
-  const authHeader = req.headers.authorization;
+router.get("/search", authenticateUser, validateIdeaQuery, async (req, res) => {
+  try {
+    const { query } = req.query;
+    const authHeader = req.headers.authorization;
 
-  if (!authHeader) {
-    return res.status(401).json({
-      error: "Missing token",
-      message: "Authorization header is required",
-    });
+    if (!authHeader) {
+      return sendAuthError(res, "Authorization header is required");
+    }
+
+    const token = authHeader.split(" ")[1];
+
+    const {
+      data: { user },
+      error: userError,
+    } = await supabase.auth.getUser(token);
+
+    if (userError || !user) {
+      return sendAuthError(
+        res,
+        userError?.message || "Unable to authenticate user"
+      );
+    }
+
+    let supabaseQuery = supabase
+      .from("ideas")
+      .select("*")
+      .eq("user_id", user.id);
+
+    if (query) {
+      supabaseQuery = supabaseQuery.ilike("title", `%${query}%`);
+    }
+
+    const { data, error } = await supabaseQuery;
+
+    if (error) {
+      console.error("Database error fetching ideas:", error);
+      return sendError(res, 400, "Unable to retrieve ideas from database", [
+        createError("database", "FETCH_FAILED", error.message),
+      ]);
+    }
+
+    const message =
+      data.length === 0 ? "No ideas found" : "Ideas retrieved successfully";
+    sendSuccess(res, 200, data, message);
+  } catch (error) {
+    console.error("Unexpected error searching ideas:", error);
+    sendServerError(
+      res,
+      "An unexpected error occurred while searching ideas",
+      error
+    );
   }
-
-  const token = authHeader.split(" ")[1];
-
-  const {
-    data: { user },
-    error: userError,
-  } = await supabase.auth.getUser(token);
-
-  if (userError || !user) {
-    return res.status(401).json({
-      error: "Invalid or expired token",
-      message: "Unable to authenticate user",
-      details: userError?.message,
-    });
-  }
-
-  let supabaseQuery = supabase.from("ideas").select("*").eq("user_id", user.id);
-
-  if (query) {
-    supabaseQuery = supabaseQuery.ilike("title", `%${query}%`);
-  }
-
-  const { data, error } = await supabaseQuery;
-
-  if (error) {
-    console.error("Database error fetching ideas:", error);
-    return res.status(400).json({
-      error: "Failed to fetch ideas",
-      message: "Unable to retrieve ideas from database",
-      details: error.message,
-    });
-  }
-
-  res.status(200).json({
-    message:
-      data.length === 0 ? "No ideas found" : "Ideas retrieved successfully",
-    data: data,
-  });
 });
 
 // GET specific idea by ID
@@ -134,10 +154,9 @@ router.get("/:id", authenticateUser, async (req, res) => {
 
     // Validate ID format (assuming UUID or numeric)
     if (!id || id.trim() === "") {
-      return res.status(400).json({
-        error: "Invalid ID",
-        message: "Idea ID is required",
-      });
+      return sendValidationError(res, [
+        createError("id", "REQUIRED", "Idea ID is required"),
+      ]);
     }
 
     const { data, error } = await supabase
@@ -149,52 +168,44 @@ router.get("/:id", authenticateUser, async (req, res) => {
 
     if (error) {
       if (error.code === "PGRST116") {
-        return res.status(404).json({
-          error: "Idea not found",
-          message:
-            "The requested idea does not exist or you don't have permission to access it",
-        });
+        return sendNotFoundError(res, "Idea");
       }
 
       console.error("Database error fetching idea:", error);
-      return res.status(400).json({
-        error: "Failed to fetch idea",
-        message: "Unable to retrieve idea from database",
-        details: error.message,
-      });
+      return sendError(res, 400, "Unable to retrieve idea from database", [
+        createError("database", "FETCH_FAILED", error.message),
+      ]);
     }
 
-    res.status(200).json({
-      message: "Idea retrieved successfully",
-      data: data,
-    });
+    sendSuccess(res, 200, data, "Idea retrieved successfully");
   } catch (error) {
     console.error("Unexpected error fetching idea:", error);
-    res.status(500).json({
-      error: "Internal server error",
-      message: "An unexpected error occurred while fetching the idea",
-    });
+    sendServerError(
+      res,
+      "An unexpected error occurred while fetching the idea",
+      error
+    );
   }
 });
 
 // UPDATE idea by ID
-router.put("/:id", authenticateUser, async (req, res) => {
+router.put("/:id", authenticateUser, validateUpdateIdea, async (req, res) => {
   try {
     const { id } = req.params;
-    const { title, content } = req.body;
+    const { title, tags, content } = req.body;
 
     // Validate ID format
     if (!id || id.trim() === "") {
-      return res.status(400).json({
-        error: "Invalid ID",
-        message: "Idea ID is required",
-      });
+      return sendValidationError(res, [
+        createError("id", "REQUIRED", "Idea ID is required"),
+      ]);
     }
 
     const { data, error } = await supabase
       .from("ideas")
       .update({
         title,
+        tags,
         content,
         updated_at: new Date().toISOString(),
       })
@@ -205,31 +216,28 @@ router.put("/:id", authenticateUser, async (req, res) => {
 
     if (error) {
       if (error.code === "PGRST116") {
-        return res.status(404).json({
-          error: "Idea not found",
-          message:
-            "The idea you're trying to update does not exist or you don't have permission to modify it",
-        });
+        return sendNotFoundError(res, "Idea");
       }
 
       console.error("Database error updating idea:", error);
-      return res.status(400).json({
-        error: "Failed to update idea",
-        message: "Unable to update idea in database",
-        details: error.message,
-      });
+      return sendError(res, 400, "Unable to update idea in database", [
+        createError("database", "UPDATE_FAILED", error.message),
+      ]);
     }
 
-    res.status(200).json({
-      message: `Idea '${data.title}' has been updated successfully`,
-      data: data,
-    });
+    sendSuccess(
+      res,
+      200,
+      data,
+      `Idea '${data.title}' has been updated successfully`
+    );
   } catch (error) {
     console.error("Unexpected error updating idea:", error);
-    res.status(500).json({
-      error: "Internal server error",
-      message: "An unexpected error occurred while updating the idea",
-    });
+    sendServerError(
+      res,
+      "An unexpected error occurred while updating the idea",
+      error
+    );
   }
 });
 
@@ -240,10 +248,9 @@ router.delete("/:id", authenticateUser, async (req, res) => {
 
     // Validate ID format
     if (!id || id.trim() === "") {
-      return res.status(400).json({
-        error: "Invalid ID",
-        message: "Idea ID is required",
-      });
+      return sendValidationError(res, [
+        createError("id", "REQUIRED", "Idea ID is required"),
+      ]);
     }
 
     // First check if the idea exists and belongs to the user
@@ -256,19 +263,13 @@ router.delete("/:id", authenticateUser, async (req, res) => {
 
     if (fetchError) {
       if (fetchError.code === "PGRST116") {
-        return res.status(404).json({
-          error: "Idea not found",
-          message:
-            "The idea you're trying to delete does not exist or you don't have permission to delete it",
-        });
+        return sendNotFoundError(res, "Idea");
       }
 
       console.error("Database error checking idea existence:", fetchError);
-      return res.status(400).json({
-        error: "Failed to verify idea",
-        message: "Unable to verify idea existence",
-        details: fetchError.message,
-      });
+      return sendError(res, 400, "Unable to verify idea existence", [
+        createError("database", "FETCH_FAILED", fetchError.message),
+      ]);
     }
 
     // Proceed with deletion
@@ -280,22 +281,24 @@ router.delete("/:id", authenticateUser, async (req, res) => {
 
     if (deleteError) {
       console.error("Database error deleting idea:", deleteError);
-      return res.status(400).json({
-        error: "Failed to delete idea",
-        message: "Unable to delete idea from database",
-        details: deleteError.message,
-      });
+      return sendError(res, 400, "Unable to delete idea from database", [
+        createError("database", "DELETE_FAILED", deleteError.message),
+      ]);
     }
 
-    res.status(200).json({
-      message: `Idea '${existingIdea.title}' has been deleted successfully`,
-    });
+    sendSuccess(
+      res,
+      200,
+      null,
+      `Idea '${existingIdea.title}' has been deleted successfully`
+    );
   } catch (error) {
     console.error("Unexpected error deleting idea:", error);
-    res.status(500).json({
-      error: "Internal server error",
-      message: "An unexpected error occurred while deleting the idea",
-    });
+    sendServerError(
+      res,
+      "An unexpected error occurred while deleting the idea",
+      error
+    );
   }
 });
 
