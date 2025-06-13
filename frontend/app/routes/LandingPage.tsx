@@ -16,6 +16,8 @@ import {
 import { useEffect, useState } from "react";
 
 import type { Route } from "../+types/root";
+import { useNavigate } from "react-router";
+import { ThemeToggle } from "~/components/theme-toggle";
 
 export const meta: Route.MetaFunction = () => {
   return [
@@ -36,15 +38,8 @@ export const meta: Route.MetaFunction = () => {
 };
 
 export default function LandingPage() {
-  const [theme, setTheme] = useState("dark");
+  const navigate = useNavigate();
   const [showScrollButton, setShowScrollButton] = useState(false);
-
-  const toggleTheme = () => {
-    const newTheme = theme === "dark" ? "light" : "dark";
-    setTheme(newTheme);
-    // Apply theme to document root
-    document.documentElement.classList.toggle("dark", newTheme === "dark");
-  };
 
   const checkScrollTop = () => {
     if (!showScrollButton && window.pageYOffset > 400) {
@@ -61,13 +56,6 @@ export default function LandingPage() {
     });
   };
 
-  useEffect(() => {
-    window.addEventListener("scroll", checkScrollTop);
-    // Initialize theme
-    document.documentElement.classList.toggle("dark", theme === "dark");
-    return () => window.removeEventListener("scroll", checkScrollTop);
-  }, [showScrollButton, theme]);
-
   return (
     <div className="min-h-screen text-foreground relative">
       <nav className="flex items-center justify-between p-6 border-b sticky top-0 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 z-50">
@@ -79,15 +67,16 @@ export default function LandingPage() {
         </div>
 
         <div className="flex items-center gap-4">
-          <Button variant="outline">Sign In</Button>
-          <Button>Sign Up</Button>
-          <Button variant="ghost" onClick={toggleTheme}>
-            {theme === "dark" ? (
-              <Sun className="h-5 w-5" />
-            ) : (
-              <Moon className="h-5 w-5" />
-            )}
+          <Button
+            variant="outline"
+            onClick={() => {
+              navigate("/signin");
+            }}
+          >
+            Sign In
           </Button>
+          <Button>Sign Up</Button>
+          <ThemeToggle />
         </div>
       </nav>
 
@@ -140,7 +129,7 @@ export default function LandingPage() {
                 <div className="flex justify-center mb-2">
                   <Users className="h-8 w-8 text-muted-foreground" />
                 </div>
-                <div className="text-2xl font-bold">10K+</div>
+                <div className="text-2xl font-bold">N/A</div>
                 <p className="text-sm text-muted-foreground">Active Users</p>
               </CardContent>
             </Card>
@@ -149,7 +138,7 @@ export default function LandingPage() {
                 <div className="flex justify-center mb-2">
                   <Star className="h-8 w-8 text-muted-foreground" />
                 </div>
-                <div className="text-2xl font-bold">4.9/5</div>
+                <div className="text-2xl font-bold">N/A</div>
                 <p className="text-sm text-muted-foreground">User Rating</p>
               </CardContent>
             </Card>
@@ -158,7 +147,7 @@ export default function LandingPage() {
                 <div className="flex justify-center mb-2">
                   <Shield className="h-8 w-8 text-muted-foreground" />
                 </div>
-                <div className="text-2xl font-bold">100%</div>
+                <div className="text-2xl font-bold">N/A</div>
                 <p className="text-sm text-muted-foreground">Secure</p>
               </CardContent>
             </Card>
@@ -232,7 +221,7 @@ export default function LandingPage() {
         <Separator />
 
         <footer className="container mx-auto px-6 py-12">
-          <div className="grid grid-cols-2 justify-items-center">
+          <div className="grid grid-cols-3 justify-items-center">
             <div>
               <div className="flex items-center gap-2 mb-4">
                 <div className="w-6 h-6 bg-primary rounded flex items-center justify-center">
@@ -243,6 +232,22 @@ export default function LandingPage() {
               <p className="text-sm text-muted-foreground">
                 AI-powered creativity tools for modern creators.
               </p>
+            </div>
+
+            <div>
+              <h4 className="font-semibold mb-4">Legal</h4>
+              <ul className="space-y-2 text-sm text-muted-foreground">
+                <li>
+                  <Button variant="link" className="p-0 h-auto">
+                    Terms Of Service
+                  </Button>
+                </li>
+                <li>
+                  <Button variant="link" className="p-0 h-auto">
+                    Privacy Policy
+                  </Button>
+                </li>
+              </ul>
             </div>
 
             <div>
@@ -265,7 +270,7 @@ export default function LandingPage() {
           <Separator className="my-8" />
 
           <div className="text-center text-sm text-muted-foreground">
-            © 2024 AIdeas. All rights reserved.
+            © 2025 AIdeas. All rights reserved.
           </div>
         </footer>
       </main>
@@ -274,7 +279,7 @@ export default function LandingPage() {
       {showScrollButton && (
         <Button
           onClick={scrollToTop}
-          className="fixed bottom-6 right-6 w-12 h-12 p-0"
+          className="fixed bottom-6 right-6 w-16 h-16 p-0"
           variant="outline"
           size="icon"
         >
