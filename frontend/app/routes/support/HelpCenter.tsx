@@ -81,7 +81,10 @@ export default function HelpCenter() {
   return (
     <div className="min-h-screen text-foreground">
       <nav className="flex items-center justify-between p-6 border-b sticky top-0 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 z-50">
-        <div className="flex items-center gap-2">
+        <div
+          className="flex items-center gap-2 cursor-pointer"
+          onClick={() => navigate("/")}
+        >
           <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
             <Brain className="h-4 w-4 text-primary-foreground" />
           </div>
