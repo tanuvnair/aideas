@@ -23,7 +23,7 @@ import {
   AlertCircle,
   CheckCircle,
 } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useForm, type SubmitHandler } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -74,6 +74,19 @@ export default function SignUp() {
   const [showPassword, setShowPassword] = useState(false);
   const [authError, setAuthError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
+
+  const checkAuth = async () => {
+    const {
+      data: { session },
+    } = await supabase.auth.getSession();
+    if (session) {
+      navigate("/dashboard");
+    }
+  };
+
+  useEffect(() => {
+    checkAuth();
+  }, []);
 
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),

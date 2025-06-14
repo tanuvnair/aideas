@@ -176,6 +176,10 @@ export default function SignIn() {
     }
   };
 
+  useEffect(() => {
+    checkAuth();
+  }, []);
+
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -210,10 +214,6 @@ export default function SignIn() {
       setAuthError("An unexpected error occurred. Please try again.");
     }
   };
-
-  useEffect(() => {
-    checkAuth();
-  }, []);
 
   const handleGoogleSignIn = async () => {
     try {

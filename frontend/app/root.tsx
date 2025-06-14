@@ -15,6 +15,7 @@ import { Button } from "./components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "./components/ui/card";
 import { AlertCircle, ArrowLeft, Brain, Home, RefreshCw } from "lucide-react";
 import { NavigationLoader } from "./components/ui/navigation-loader";
+import { ThemeToggle } from "./components/theme-toggle";
 
 export const links: Route.LinksFunction = () => [
   { rel: "preconnect", href: "https://fonts.googleapis.com" },
@@ -82,26 +83,32 @@ export function ErrorBoundary({ error }: { error: unknown }) {
   }
 
   const handleGoHome = () => navigate("/");
-  const handleReload = () => window.location.reload();
+  const handleReload = () => navigate(0);
 
   return (
     <div className="min-h-screen text-foreground">
       {/* Navigation */}
-      <nav className="flex items-center justify-between p-6 border-b">
-        <div className="flex items-center gap-2">
+      <nav className="flex items-center justify-between p-6 border-b sticky top-0 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 z-50">
+        <div
+          className="flex items-center gap-2 cursor-pointer"
+          onClick={() => navigate("/")}
+        >
           <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
             <Brain className="h-4 w-4 text-primary-foreground" />
           </div>
           <span className="text-lg font-semibold">AIdeas</span>
         </div>
-        <Button
-          variant="ghost"
-          className="flex items-center gap-2"
-          onClick={() => navigate(-1)}
-        >
-          <ArrowLeft className="h-4 w-4" />
-          Go Back
-        </Button>
+        <div className="flex items-center gap-4">
+          <Button
+            variant="ghost"
+            className="flex items-center gap-2"
+            onClick={() => navigate(-1)}
+          >
+            <ArrowLeft className="h-4 w-4" />
+            Go Back
+          </Button>
+          <ThemeToggle />
+        </div>
       </nav>
 
       {/* Main Content */}
@@ -149,7 +156,11 @@ export function ErrorBoundary({ error }: { error: unknown }) {
           <div className="text-center mt-6">
             <p className="text-sm text-muted-foreground">
               Need help?{" "}
-              <Button variant="link" className="px-0 text-sm h-auto">
+              <Button
+                variant="link"
+                className="px-0 text-sm h-auto"
+                onClick={() => navigate("/contact")}
+              >
                 Contact support
               </Button>
             </p>
