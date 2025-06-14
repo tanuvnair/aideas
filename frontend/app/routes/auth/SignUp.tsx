@@ -31,6 +31,7 @@ import { redirect, useNavigate } from "react-router";
 
 import type { Route } from "../../+types/root";
 import { supabase } from "~/lib/supabase";
+import { ThemeToggle } from "~/components/theme-toggle";
 
 export const meta: Route.MetaFunction = () => {
   return [
@@ -147,7 +148,7 @@ export default function SignUp() {
   return (
     <div className="min-h-screen text-foreground">
       {/* Navigation */}
-      <nav className="flex items-center justify-between p-6 border-b">
+      <nav className="flex items-center justify-between p-6 border-b sticky top-0 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 z-50">
         <div
           className="flex items-center gap-2 cursor-pointer"
           onClick={() => navigate("/")}
@@ -157,14 +158,17 @@ export default function SignUp() {
           </div>
           <span className="text-lg font-semibold">AIdeas</span>
         </div>
-        <Button
-          variant="ghost"
-          className="flex items-center gap-2"
-          onClick={() => navigate(-1)}
-        >
-          <ArrowLeft className="h-4 w-4" />
-          Go Back
-        </Button>
+        <div className="flex items-center gap-4">
+          <Button
+            variant="ghost"
+            className="flex items-center gap-2"
+            onClick={() => navigate(-1)}
+          >
+            <ArrowLeft className="h-4 w-4" />
+            Go Back
+          </Button>
+          <ThemeToggle />
+        </div>
       </nav>
 
       {/* Main Content */}

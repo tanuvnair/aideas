@@ -8,5 +8,6 @@ export default [
   route("/help-center", "routes/support/HelpCenter.tsx"),
   route("/signin", "routes/auth/SignIn.tsx"),
   route("/signup", "routes/auth/SignUp.tsx"),
+  route("/reset-password", "routes/auth/ResetPassword.tsx"),
   route("/dashboard", "routes/dashboard/Dashboard.tsx"),
 ] satisfies RouteConfig;

@@ -13,7 +13,23 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { Brain, Eye, EyeOff, Mail, ArrowLeft, AlertCircle } from "lucide-react";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import {
+  Brain,
+  Eye,
+  EyeOff,
+  Mail,
+  ArrowLeft,
+  AlertCircle,
+  Loader2,
+} from "lucide-react";
 import { useEffect, useState } from "react";
 import { useForm, type SubmitHandler } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -22,6 +38,7 @@ import { useNavigate } from "react-router";
 
 import type { Route } from "../../+types/root";
 import { supabase } from "~/lib/supabase";
+import { ThemeToggle } from "~/components/theme-toggle";
 
 export const meta: Route.MetaFunction = () => {
   return [
@@ -52,6 +69,98 @@ const formSchema = z.object({
 });
 
 type FormData = z.infer<typeof formSchema>;
+
+const ForgotPasswordDialog = () => {
+  const [email, setEmail] = useState("");
+  const [isSubmitted, setIsSubmitted] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [isOpen, setIsOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError(null);
+    setIsLoading(true);
+
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${import.meta.env.VITE_FRONTEND_URL}/reset-password`,
+      });
+
+      if (error) {
+        setError(error.message);
+        return;
+      }
+
+      setIsSubmitted(true);
+    } catch (err) {
+      setError("An unexpected error occurred. Please try again.");
+      console.error("Password reset error:", err);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  return (
+    <Dialog open={isOpen} onOpenChange={setIsOpen}>
+      <DialogTrigger asChild>
+        <Button variant="link" className="px-0 text-sm" type="button">
+          Forgot password?
+        </Button>
+      </DialogTrigger>
+      <DialogContent className="text-foreground">
+        <DialogHeader>
+          <DialogTitle>Reset your password</DialogTitle>
+          <DialogDescription>
+            Enter your email address and we'll send you a link to reset your
+            password.
+          </DialogDescription>
+        </DialogHeader>
+
+        {isSubmitted ? (
+          <Alert>
+            <AlertCircle className="h-4 w-4" />
+            <AlertDescription>
+              Password reset link sent! Please check your email.
+            </AlertDescription>
+          </Alert>
+        ) : (
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="email">Email</Label>
+              <Input
+                id="email"
+                type="email"
+                placeholder="Enter your email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+              />
+            </div>
+
+            {error && (
+              <Alert variant="destructive">
+                <AlertCircle className="h-4 w-4" />
+                <AlertDescription>{error}</AlertDescription>
+              </Alert>
+            )}
+
+            <Button type="submit" className="w-full" disabled={isLoading}>
+              {isLoading ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Sending...
+                </>
+              ) : (
+                "Send Reset Link"
+              )}
+            </Button>
+          </form>
+        )}
+      </DialogContent>
+    </Dialog>
+  );
+};
 
 export default function SignIn() {
   const navigate = useNavigate();
@@ -131,7 +240,7 @@ export default function SignIn() {
   return (
     <div className="min-h-screen text-foreground">
       {/* Navigation */}
-      <nav className="flex items-center justify-between p-6 border-b">
+      <nav className="flex items-center justify-between p-6 border-b sticky top-0 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 z-50">
         <div
           className="flex items-center gap-2 cursor-pointer"
           onClick={() => navigate("/")}
@@ -141,14 +250,17 @@ export default function SignIn() {
           </div>
           <span className="text-lg font-semibold">AIdeas</span>
         </div>
-        <Button
-          variant="ghost"
-          className="flex items-center gap-2"
-          onClick={() => navigate(-1)}
-        >
-          <ArrowLeft className="h-4 w-4" />
-          Go Back
-        </Button>
+        <div className="flex items-center gap-4">
+          <Button
+            variant="ghost"
+            className="flex items-center gap-2"
+            onClick={() => navigate(-1)}
+          >
+            <ArrowLeft className="h-4 w-4" />
+            Go Back
+          </Button>
+          <ThemeToggle />
+        </div>
       </nav>
 
       {/* Main Content */}
@@ -288,14 +400,7 @@ export default function SignIn() {
                         </FormItem>
                       )}
                     />
-                    <Button
-                      variant="link"
-                      className="px-0 text-sm"
-                      type="button"
-                      onClick={() => navigate("/forgot-password")}
-                    >
-                      Forgot password?
-                    </Button>
+                    <ForgotPasswordDialog />
                   </div>
 
                   <Button
