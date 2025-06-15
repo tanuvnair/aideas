@@ -23,12 +23,11 @@ import {
   Tag,
 } from "lucide-react";
 import { Separator } from "~/components/ui/separator";
-import { useState } from "react";
-
+import { useState, useEffect } from "react";
+import { AIdeaService } from "~/lib/aideas";
+import type { AIdea } from "~/lib/aideas";
 import type { Route } from "../../+types/root";
 import { ThemeToggle } from "~/components/theme-toggle";
-import { Label } from "@radix-ui/react-label";
-import { FormLabel } from "~/components/ui/form";
 
 export const meta: Route.MetaFunction = () => {
   return [
@@ -51,10 +50,62 @@ export const meta: Route.MetaFunction = () => {
 export default function Dashboard() {
   const navigate = useNavigate();
   const [isSigningOut, setIsSigningOut] = useState(false);
-  const [newIdeaTitle, setNewIdeaTitle] = useState("");
-  const [newIdeaTags, setNewIdeaTags] = useState<string[]>([]);
+  const [newAideaTitle, setNewAideaTitle] = useState("");
+  const [newAideaTags, setNewAideaTags] = useState<string[]>([]);
   const [tagInput, setTagInput] = useState("");
   const [isCreating, setIsCreating] = useState(false);
+  const [recentAideas, setRecentAideas] = useState<AIdea[]>([]);
+  const [allAideas, setAllAideas] = useState<AIdea[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [searchQuery, setSearchQuery] = useState("");
+
+  // Fetch aideas on component mount
+  useEffect(() => {
+    const fetchAideas = async () => {
+      setIsLoading(true);
+      try {
+        // Fetch recent aideas (last 5)
+        const { data: recentData } = await AIdeaService.getRecent();
+        if (recentData) {
+          setRecentAideas(recentData);
+        }
+
+        // Fetch all aideas
+        const { data: allData } = await AIdeaService.getAll();
+        if (allData) {
+          setAllAideas(allData);
+        }
+      } catch (error) {
+        console.error("Error fetching aideas:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchAideas();
+  }, []);
+
+  // Handle search
+  useEffect(() => {
+    if (searchQuery.trim()) {
+      const search = async () => {
+        const { data } = await AIdeaService.search(searchQuery);
+        if (data) {
+          setAllAideas(data);
+        }
+      };
+      search();
+    } else {
+      // Reset to all aideas if search is cleared
+      const fetchAll = async () => {
+        const { data } = await AIdeaService.getAll();
+        if (data) {
+          setAllAideas(data);
+        }
+      };
+      fetchAll();
+    }
+  }, [searchQuery]);
 
   const handleSignOut = async () => {
     setIsSigningOut(true);
@@ -62,30 +113,45 @@ export default function Dashboard() {
     navigate("/signin");
   };
 
-  const handleCreateIdea = async () => {
-    if (!newIdeaTitle.trim()) return;
+  const handleCreateAidea = async () => {
+    if (!newAideaTitle.trim()) return;
 
     setIsCreating(true);
-    // TODO: Add your idea creation logic here
-    // For now, just navigate to new note page
-    navigate("/new-note", {
-      state: { title: newIdeaTitle, tags: newIdeaTags },
-    });
-    setNewIdeaTitle("");
-    setNewIdeaTags([]);
-    setTagInput("");
-    setIsCreating(false);
+    try {
+      const { data: newAidea, error } = await AIdeaService.create({
+        title: newAideaTitle,
+        tags: newAideaTags,
+      });
+
+      if (error) {
+        console.error("Error creating aidea:", error);
+        return;
+      }
+
+      if (newAidea) {
+        // Update the recent aideas and all aideas lists
+        setRecentAideas((prev) => [newAidea, ...prev.slice(0, 4)]);
+        setAllAideas((prev) => [newAidea, ...prev]);
+      }
+    } catch (error) {
+      console.error("Error creating aidea:", error);
+    } finally {
+      setNewAideaTitle("");
+      setNewAideaTags([]);
+      setTagInput("");
+      setIsCreating(false);
+    }
   };
 
   const handleAddTag = () => {
-    if (tagInput.trim() && !newIdeaTags.includes(tagInput.trim())) {
-      setNewIdeaTags([...newIdeaTags, tagInput.trim()]);
+    if (tagInput.trim() && !newAideaTags.includes(tagInput.trim())) {
+      setNewAideaTags([...newAideaTags, tagInput.trim()]);
       setTagInput("");
     }
   };
 
   const handleRemoveTag = (tagToRemove: string) => {
-    setNewIdeaTags(newIdeaTags.filter((tag) => tag !== tagToRemove));
+    setNewAideaTags(newAideaTags.filter((tag) => tag !== tagToRemove));
   };
 
   const handleTagInputKeyPress = (e: React.KeyboardEvent) => {
@@ -94,89 +160,6 @@ export default function Dashboard() {
       handleAddTag();
     }
   };
-
-  const recentIdeas = [
-    {
-      id: 1,
-      title: "Marketing Campaign Concepts",
-      type: "note",
-      createdAt: "2 hours ago",
-      tags: ["marketing", "campaign", "creative"],
-    },
-    {
-      id: 2,
-      title: "Product Sketch",
-      type: "drawing",
-      createdAt: "Yesterday",
-      tags: ["design", "product", "sketch"],
-    },
-    {
-      id: 3,
-      title: "Meeting Notes",
-      type: "note",
-      createdAt: "3 days ago",
-      tags: ["meeting", "notes", "project"],
-    },
-  ];
-
-  const allIdeas = [
-    {
-      id: 1,
-      title: "Marketing Campaign Concepts",
-      type: "note",
-      createdAt: "2 hours ago",
-      tags: ["marketing", "campaign", "creative"],
-    },
-    {
-      id: 2,
-      title: "Product Sketch",
-      type: "drawing",
-      createdAt: "Yesterday",
-      tags: ["design", "product", "sketch"],
-    },
-    {
-      id: 3,
-      title: "Meeting Notes",
-      type: "note",
-      createdAt: "3 days ago",
-      tags: ["meeting", "notes", "project"],
-    },
-    {
-      id: 4,
-      title: "Brand Identity Exploration",
-      type: "drawing",
-      createdAt: "1 week ago",
-      tags: ["branding", "identity", "design"],
-    },
-    {
-      id: 5,
-      title: "Project Roadmap",
-      type: "note",
-      createdAt: "1 week ago",
-      tags: ["planning", "roadmap", "strategy"],
-    },
-    {
-      id: 6,
-      title: "User Interface Wireframes",
-      type: "drawing",
-      createdAt: "2 weeks ago",
-      tags: ["ui", "wireframes", "design"],
-    },
-    {
-      id: 7,
-      title: "Research Notes",
-      type: "note",
-      createdAt: "2 weeks ago",
-      tags: ["research", "analysis", "data"],
-    },
-    {
-      id: 8,
-      title: "Architecture Diagram",
-      type: "drawing",
-      createdAt: "3 weeks ago",
-      tags: ["architecture", "diagram", "technical"],
-    },
-  ];
 
   return (
     <ProtectedRoute>
@@ -191,11 +174,11 @@ export default function Dashboard() {
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <Input
-                    placeholder="Enter your idea title..."
-                    value={newIdeaTitle}
-                    onChange={(e) => setNewIdeaTitle(e.target.value)}
+                    placeholder="Enter your aidea title..."
+                    value={newAideaTitle}
+                    onChange={(e) => setNewAideaTitle(e.target.value)}
                     onKeyPress={(e) =>
-                      e.key === "Enter" && !tagInput && handleCreateIdea()
+                      e.key === "Enter" && !tagInput && handleCreateAidea()
                     }
                   />
 
@@ -221,9 +204,9 @@ export default function Dashboard() {
                       </Button>
                     </div>
 
-                    {newIdeaTags.length > 0 && (
+                    {newAideaTags.length > 0 && (
                       <div className="flex flex-wrap gap-2">
-                        {newIdeaTags.map((tag) => (
+                        {newAideaTags.map((tag) => (
                           <Badge
                             key={tag}
                             variant="secondary"
@@ -249,8 +232,8 @@ export default function Dashboard() {
 
                   <Button
                     className="w-full"
-                    onClick={handleCreateIdea}
-                    disabled={!newIdeaTitle.trim() || isCreating}
+                    onClick={handleCreateAidea}
+                    disabled={!newAideaTitle.trim() || isCreating}
                   >
                     {isCreating ? (
                       <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -312,59 +295,68 @@ export default function Dashboard() {
                 </CardHeader>
                 <CardContent>
                   <p className="text-muted-foreground">
-                    Ready to turn your ideas into reality? Start with a new note
-                    or drawing, or continue where you left off.
+                    Ready to turn your aideas into reality? Start with a new
+                    note or drawing, or continue where you left off.
                   </p>
                 </CardContent>
               </Card>
 
               <Card>
                 <CardHeader className="pb-4">
-                  <CardTitle>Recent Ideas</CardTitle>
+                  <CardTitle>Recent AIdeas</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="space-y-4">
-                    {recentIdeas.map((idea, index) => (
-                      <div key={idea.id}>
-                        <div className="group flex items-center justify-between p-4 rounded-lg hover:bg-muted/50 cursor-pointer transition-colors">
-                          <div className="flex items-center space-x-4 flex-1 min-w-0">
-                            {idea.type === "note" ? (
-                              <FileText className="h-5 w-5 text-muted-foreground flex-shrink-0" />
-                            ) : (
+                  {isLoading ? (
+                    <div className="flex justify-center items-center h-32">
+                      <Loader2 className="h-8 w-8 animate-spin" />
+                    </div>
+                  ) : recentAideas.length === 0 ? (
+                    <p className="text-muted-foreground text-center py-8">
+                      No recent aideas found. Create your first one!
+                    </p>
+                  ) : (
+                    <div className="space-y-4">
+                      {recentAideas.map((aidea, index) => (
+                        <div key={aidea.id}>
+                          <div
+                            className="group flex items-center justify-between p-4 rounded-lg hover:bg-muted/50 cursor-pointer transition-colors"
+                            onClick={() => navigate(`/aidea/${aidea.id}`)}
+                          >
+                            <div className="flex items-center space-x-4 flex-1 min-w-0">
                               <Lightbulb className="h-5 w-5 text-muted-foreground flex-shrink-0" />
-                            )}
-                            <div className="flex-1 min-w-0 space-y-1">
-                              <span className="font-medium block truncate">
-                                {idea.title}
-                              </span>
-                              <p className="text-sm text-muted-foreground">
-                                {idea.createdAt}
-                              </p>
-                              <div className="flex flex-wrap gap-1">
-                                {idea.tags.map((tag) => (
-                                  <Badge
-                                    key={tag}
-                                    variant="outline"
-                                    className="text-xs"
-                                  >
-                                    {tag}
-                                  </Badge>
-                                ))}
+                              <div className="flex-1 min-w-0 space-y-1">
+                                <span className="font-medium block truncate">
+                                  {aidea.title}
+                                </span>
+                                <p className="text-sm text-muted-foreground">
+                                  {aidea.created_at}
+                                </p>
+                                <div className="flex flex-wrap gap-1">
+                                  {aidea.tags.map((tag) => (
+                                    <Badge
+                                      key={tag}
+                                      variant="outline"
+                                      className="text-xs"
+                                    >
+                                      {tag}
+                                    </Badge>
+                                  ))}
+                                </div>
                               </div>
                             </div>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="opacity-0 group-hover:opacity-100 flex-shrink-0"
+                            >
+                              Open
+                            </Button>
                           </div>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            className="opacity-0 group-hover:opacity-100 flex-shrink-0"
-                          >
-                            Open
-                          </Button>
+                          {index < recentAideas.length - 1 && <Separator />}
                         </div>
-                        {index < recentIdeas.length - 1 && <Separator />}
-                      </div>
-                    ))}
-                  </div>
+                      ))}
+                    </div>
+                  )}
                 </CardContent>
               </Card>
 
@@ -375,50 +367,59 @@ export default function Dashboard() {
                     <div className="relative">
                       <Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
                       <Input
-                        placeholder="Search ideas..."
+                        placeholder="Search aideas..."
                         className="pl-10 w-64"
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
                       />
                     </div>
                   </div>
                 </CardHeader>
                 <CardContent>
-                  <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-                    {allIdeas.map((idea) => (
-                      <Card
-                        key={idea.id}
-                        className="hover:shadow-md transition-shadow cursor-pointer"
-                      >
-                        <CardContent className="p-5">
-                          <div className="flex items-start space-x-4">
-                            {idea.type === "note" ? (
-                              <FileText className="h-5 w-5 text-muted-foreground mt-0.5 flex-shrink-0" />
-                            ) : (
+                  {isLoading ? (
+                    <div className="flex justify-center items-center h-32">
+                      <Loader2 className="h-8 w-8 animate-spin" />
+                    </div>
+                  ) : allAideas.length === 0 ? (
+                    <p className="text-muted-foreground text-center py-8">
+                      No aideas found. Create your first one!
+                    </p>
+                  ) : (
+                    <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+                      {allAideas.map((aidea) => (
+                        <Card
+                          key={aidea.id}
+                          className="hover:shadow-md transition-shadow cursor-pointer"
+                          onClick={() => navigate(`/aidea/${aidea.id}`)}
+                        >
+                          <CardContent className="p-5">
+                            <div className="flex items-start space-x-4">
                               <Lightbulb className="h-5 w-5 text-muted-foreground mt-0.5 flex-shrink-0" />
-                            )}
-                            <div className="flex-1 min-w-0 space-y-2">
-                              <h3 className="font-medium truncate">
-                                {idea.title}
-                              </h3>
-                              <p className="text-sm text-muted-foreground">
-                                {idea.createdAt}
-                              </p>
-                              <div className="flex flex-wrap gap-1">
-                                {idea.tags.map((tag) => (
-                                  <Badge
-                                    key={tag}
-                                    variant="outline"
-                                    className="text-xs"
-                                  >
-                                    {tag}
-                                  </Badge>
-                                ))}
+                              <div className="flex-1 min-w-0 space-y-2">
+                                <h3 className="font-medium truncate">
+                                  {aidea.title}
+                                </h3>
+                                <p className="text-sm text-muted-foreground">
+                                  {aidea.created_at}
+                                </p>
+                                <div className="flex flex-wrap gap-1">
+                                  {aidea.tags.map((tag) => (
+                                    <Badge
+                                      key={tag}
+                                      variant="outline"
+                                      className="text-xs"
+                                    >
+                                      {tag}
+                                    </Badge>
+                                  ))}
+                                </div>
                               </div>
                             </div>
-                          </div>
-                        </CardContent>
-                      </Card>
-                    ))}
-                  </div>
+                          </CardContent>
+                        </Card>
+                      ))}
+                    </div>
+                  )}
                 </CardContent>
               </Card>
             </div>
