@@ -264,7 +264,16 @@ export default function Dashboard() {
                   <CardTitle className="text-lg">Navigation</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-2">
-                  <Button variant="ghost" className="w-full justify-start">
+                  <Button
+                    variant="ghost"
+                    className="w-full justify-start"
+                    onClick={() => {
+                      const element = document.getElementById("my-aideas");
+                      if (element) {
+                        element.scrollIntoView({ behavior: "smooth" });
+                      }
+                    }}
+                  >
                     <Lightbulb className="mr-2 h-4 w-4" />
                     My AIdeas
                   </Button>
@@ -355,7 +364,7 @@ export default function Dashboard() {
                 </CardContent>
               </Card>
 
-              <Card>
+              <Card id="my-aideas">
                 <CardHeader className="pb-4">
                   <div className="flex items-center justify-between">
                     <CardTitle>All AIdeas</CardTitle>
