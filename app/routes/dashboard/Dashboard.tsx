@@ -458,7 +458,7 @@ export default function Dashboard() {
                                     aidea.created_at
                                   ).toLocaleDateString()}
                                 </p>
-                                <div className="flex flex-wrap gap-1">
+                                <div className="flex flex-wrap">
                                   {aidea.tags.map((tag) => (
                                     <Badge
                                       key={tag}
