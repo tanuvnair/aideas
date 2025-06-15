@@ -20,13 +20,21 @@ import {
   Search,
   X,
   Tag,
+  Edit,
+  Trash2,
+  MoreVertical,
 } from "lucide-react";
 import { Separator } from "~/components/ui/separator";
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect } from "react";
 import { AIdeaService } from "~/lib/aideas";
 import type { AIdea } from "~/lib/aideas";
-import type { Route } from "../../+types/root";
 import { ThemeToggle } from "~/components/theme-toggle";
+import {
+  ContextMenu,
+  ContextMenuContent,
+  ContextMenuItem,
+  ContextMenuTrigger,
+} from "~/components/ui/context-menu";
 
 export default function Dashboard() {
   const navigate = useNavigate();
@@ -67,7 +75,7 @@ export default function Dashboard() {
     fetchAideas();
   }, []);
 
-  // Handle search - now using client-side filtering for better performance
+  // Handle search - client-side filtering
   useEffect(() => {
     if (searchQuery.trim()) {
       setIsSearching(true);
@@ -118,6 +126,24 @@ export default function Dashboard() {
       setNewAideaTags([]);
       setTagInput("");
       setIsCreating(false);
+    }
+  };
+
+  const handleEditAidea = (aideaId: number) => {
+    navigate(`/aidea/${aideaId}/edit`);
+  };
+
+  const handleDeleteAidea = async (aideaId: number) => {
+    try {
+      const { success, error } = await AIdeaService.delete(aideaId);
+      if (error) throw error;
+
+      // Update state
+      setRecentAideas((prev) => prev.filter((a) => a.id !== aideaId));
+      setAllAideas((prev) => prev.filter((a) => a.id !== aideaId));
+      setFilteredAideas((prev) => prev.filter((a) => a.id !== aideaId));
+    } catch (error) {
+      console.error("Error deleting aidea:", error);
     }
   };
 
@@ -324,13 +350,30 @@ export default function Dashboard() {
                                 </div>
                               </div>
                             </div>
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              className="opacity-0 group-hover:opacity-100 flex-shrink-0"
-                            >
-                              Open
-                            </Button>
+                            <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100">
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                className="h-8 w-8 p-0"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleEditAidea(aidea.id);
+                                }}
+                              >
+                                <Edit className="h-4 w-4" />
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                className="h-8 w-8 p-0 text-destructive hover:text-destructive"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleDeleteAidea(aidea.id);
+                                }}
+                              >
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
+                            </div>
                           </div>
                           {index < recentAideas.length - 1 && <Separator />}
                         </div>
@@ -372,38 +415,68 @@ export default function Dashboard() {
                   ) : (
                     <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
                       {filteredAideas.map((aidea) => (
-                        <Card
-                          key={aidea.id}
-                          className="hover:shadow-md transition-shadow cursor-pointer"
-                          onClick={() => navigate(`/aidea/${aidea.id}`)}
-                        >
-                          <CardContent className="p-5">
-                            <div className="flex items-start space-x-4">
-                              <Lightbulb className="h-5 w-5 text-muted-foreground mt-0.5 flex-shrink-0" />
-                              <div className="flex-1 min-w-0 space-y-2">
-                                <h3 className="font-medium truncate">
-                                  {aidea.title}
-                                </h3>
-                                <p className="text-sm text-muted-foreground">
-                                  {new Date(
-                                    aidea.created_at
-                                  ).toLocaleDateString()}
-                                </p>
-                                <div className="flex flex-wrap gap-1">
-                                  {aidea.tags.map((tag) => (
-                                    <Badge
-                                      key={tag}
-                                      variant="outline"
-                                      className="text-xs"
-                                    >
-                                      {tag}
-                                    </Badge>
-                                  ))}
+                        <ContextMenu key={aidea.id}>
+                          <ContextMenuTrigger>
+                            <Card
+                              className="hover:shadow-md transition-shadow cursor-pointer"
+                              onClick={() => navigate(`/aidea/${aidea.id}`)}
+                            >
+                              <CardContent className="p-5">
+                                <div className="flex items-start space-x-4">
+                                  <Lightbulb className="h-5 w-5 text-muted-foreground mt-0.5 flex-shrink-0" />
+                                  <div className="flex-1 min-w-0 space-y-2">
+                                    <h3 className="font-medium truncate">
+                                      {aidea.title}
+                                    </h3>
+                                    <p className="text-sm text-muted-foreground">
+                                      {new Date(
+                                        aidea.created_at
+                                      ).toLocaleDateString()}
+                                    </p>
+                                    <div className="flex flex-wrap gap-1">
+                                      {aidea.tags.map((tag) => (
+                                        <Badge
+                                          key={tag}
+                                          variant="outline"
+                                          className="text-xs"
+                                        >
+                                          {tag}
+                                        </Badge>
+                                      ))}
+                                    </div>
+                                  </div>
                                 </div>
-                              </div>
-                            </div>
-                          </CardContent>
-                        </Card>
+                              </CardContent>
+                            </Card>
+                          </ContextMenuTrigger>
+                          <ContextMenuContent>
+                            <ContextMenuItem
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                navigate(`/aidea/${aidea.id}`);
+                              }}
+                            >
+                              Open
+                            </ContextMenuItem>
+                            <ContextMenuItem
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleEditAidea(aidea.id);
+                              }}
+                            >
+                              Edit
+                            </ContextMenuItem>
+                            <ContextMenuItem
+                              className="text-destructive focus:text-destructive"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleDeleteAidea(aidea.id);
+                              }}
+                            >
+                              Delete
+                            </ContextMenuItem>
+                          </ContextMenuContent>
+                        </ContextMenu>
                       ))}
                     </div>
                   )}
