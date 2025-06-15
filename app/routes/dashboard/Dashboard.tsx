@@ -54,6 +54,7 @@ import {
   ContextMenuTrigger,
 } from "~/components/ui/context-menu";
 import type { Route } from "../../+types/root";
+import { Label } from "~/components/ui/label";
 
 export const meta: Route.MetaFunction = () => {
   return [
@@ -412,7 +413,7 @@ export default function Dashboard() {
             </div>
 
             {/* Main Content */}
-            <div className="flex-1 space-y-8">
+            <div className="flex-1 space-y-6">
               <Card>
                 <CardHeader className="pb-4 flex items-center justify-between">
                   <CardTitle>Welcome Back!</CardTitle>
@@ -458,7 +459,7 @@ export default function Dashboard() {
                                     aidea.created_at
                                   ).toLocaleDateString()}
                                 </p>
-                                <div className="flex flex-wrap">
+                                <div className="flex flex-wrap gap-1">
                                   {aidea.tags.map((tag) => (
                                     <Badge
                                       key={tag}
@@ -471,7 +472,7 @@ export default function Dashboard() {
                                 </div>
                               </div>
                             </div>
-                            <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100">
+                            <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
                               <Button
                                 variant="ghost"
                                 size="sm"
@@ -534,7 +535,7 @@ export default function Dashboard() {
                         : "No aideas found. Create your first one!"}
                     </p>
                   ) : (
-                    <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+                    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
                       {filteredAideas.map((aidea) => (
                         <ContextMenu key={aidea.id}>
                           <ContextMenuTrigger>
@@ -542,8 +543,8 @@ export default function Dashboard() {
                               className="hover:shadow-md transition-shadow cursor-pointer"
                               onClick={() => navigate(`/aidea/${aidea.id}`)}
                             >
-                              <CardContent className="p-5">
-                                <div className="flex items-start space-x-4">
+                              <CardContent className="p-4">
+                                <div className="flex items-start space-x-3">
                                   <Lightbulb className="h-5 w-5 text-muted-foreground mt-0.5 flex-shrink-0" />
                                   <div className="flex-1 min-w-0 space-y-2">
                                     <h3 className="font-medium truncate">
@@ -618,9 +619,9 @@ export default function Dashboard() {
             </DialogHeader>
             <div className="grid gap-4 py-4">
               <div className="space-y-2">
-                <label htmlFor="edit-title" className="text-sm font-medium">
+                <Label htmlFor="edit-title" className="text-sm font-medium">
                   Title
-                </label>
+                </Label>
                 <Input
                   id="edit-title"
                   value={editTitle}
@@ -629,9 +630,9 @@ export default function Dashboard() {
                 />
               </div>
               <div className="space-y-2">
-                <label htmlFor="edit-tags" className="text-sm font-medium">
+                <Label htmlFor="edit-tags" className="text-sm font-medium">
                   Tags
-                </label>
+                </Label>
                 <div className="flex space-x-2">
                   <div className="relative flex-1">
                     <Tag className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
@@ -659,16 +660,11 @@ export default function Dashboard() {
                       <Badge
                         key={tag}
                         variant="secondary"
-                        className="flex items-center gap-1 pr-1"
+                        className="flex items-center gap-1 pr-1 cursor-pointer"
+                        onClick={() => handleRemoveEditTag(tag)}
                       >
                         <span>{tag}</span>
-                        <button
-                          type="button"
-                          className="ml-1 cursor-pointer"
-                          onClick={() => handleRemoveEditTag(tag)}
-                        >
-                          <X className="h-3 w-3" />
-                        </button>
+                        <X className="h-3 w-3" />
                       </Badge>
                     ))}
                   </div>
