@@ -74,15 +74,7 @@ export default function Dashboard() {
                     onClick={() => navigate("/new-note")}
                   >
                     <Plus className="mr-2 h-4 w-4" />
-                    New Note
-                  </Button>
-                  <Button
-                    variant="outline"
-                    className="w-full justify-start"
-                    onClick={() => navigate("/new-drawing")}
-                  >
-                    <Plus className="mr-2 h-4 w-4" />
-                    New Drawing
+                    New AIdea
                   </Button>
                 </CardContent>
               </Card>
@@ -93,12 +85,8 @@ export default function Dashboard() {
                 </CardHeader>
                 <CardContent className="space-y-2">
                   <Button variant="ghost" className="w-full justify-start">
-                    <FileText className="mr-2 h-4 w-4" />
-                    My Notes
-                  </Button>
-                  <Button variant="ghost" className="w-full justify-start">
                     <Lightbulb className="mr-2 h-4 w-4" />
-                    My Ideas
+                    My AIdeas
                   </Button>
                   <Button variant="ghost" className="w-full justify-start">
                     <Settings className="mr-2 h-4 w-4" />
@@ -168,58 +156,6 @@ export default function Dashboard() {
                   </div>
                 </CardContent>
               </Card>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="text-lg">Quick Stats</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-4">
-                      <div className="flex justify-between">
-                        <span className="text-muted-foreground">
-                          Total Notes
-                        </span>
-                        <span className="font-medium">24</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-muted-foreground">
-                          Total Drawings
-                        </span>
-                        <span className="font-medium">12</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-muted-foreground">
-                          AI Suggestions
-                        </span>
-                        <span className="font-medium">8</span>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="text-lg">AI Suggestions</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-3">
-                      <div className="p-3 bg-muted/50 rounded-lg">
-                        <p className="text-sm">
-                          "Have you considered visualizing your notes as mind
-                          maps?"
-                        </p>
-                      </div>
-                      <div className="p-3 bg-muted/50 rounded-lg">
-                        <p className="text-sm">
-                          "Your marketing notes might work well as an
-                          infographic."
-                        </p>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              </div>
             </div>
           </div>
         </div>
