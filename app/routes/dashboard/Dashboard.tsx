@@ -663,16 +663,16 @@ export default function Dashboard() {
             </div>
             <DialogFooter>
               <Button
+                variant="link"
+                onClick={() => (window.location.href = "/reset-password")}
+              >
+                Reset Password
+              </Button>
+              <Button
                 variant="outline"
                 onClick={() => setIsSettingsDialogOpen(false)}
               >
                 Cancel
-              </Button>
-              <Button
-                variant="outline"
-                onClick={() => (window.location.href = "/reset-password")}
-              >
-                Reset Password
               </Button>
               <Button onClick={handleUpdateSettings} disabled={isUpdating}>
                 {isUpdating ? (
