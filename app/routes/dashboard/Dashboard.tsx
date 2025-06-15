@@ -8,6 +8,24 @@ import {
 } from "~/components/ui/card";
 import { Input } from "~/components/ui/input";
 import { Badge } from "~/components/ui/badge";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "~/components/ui/dialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "~/components/ui/alert-dialog";
 import { supabase } from "~/lib/supabase";
 import ProtectedRoute from "~/components/protected-route";
 import { useNavigate } from "react-router";
@@ -68,6 +86,19 @@ export default function Dashboard() {
   const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [isSearching, setIsSearching] = useState(false);
+
+  // Edit dialog state
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [editingAidea, setEditingAidea] = useState<AIdea | null>(null);
+  const [editTitle, setEditTitle] = useState("");
+  const [editTags, setEditTags] = useState<string[]>([]);
+  const [editTagInput, setEditTagInput] = useState("");
+  const [isUpdating, setIsUpdating] = useState(false);
+
+  // Delete confirmation dialog state
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [deletingAidea, setDeletingAidea] = useState<AIdea | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   // Fetch all aideas on component mount
   useEffect(() => {
@@ -148,21 +179,74 @@ export default function Dashboard() {
     }
   };
 
-  const handleEditAidea = (aideaId: number) => {
-    navigate(`/aidea/${aideaId}/edit`);
+  const handleEditAidea = (aidea: AIdea) => {
+    setEditingAidea(aidea);
+    setEditTitle(aidea.title);
+    setEditTags([...aidea.tags]);
+    setEditTagInput("");
+    setIsEditDialogOpen(true);
   };
 
-  const handleDeleteAidea = async (aideaId: number) => {
+  const handleUpdateAidea = async () => {
+    if (!editingAidea || !editTitle.trim()) return;
+
+    setIsUpdating(true);
     try {
-      const { success, error } = await AIdeaService.delete(aideaId);
+      const { data: updatedAidea, error } = await AIdeaService.update(
+        editingAidea.id,
+        {
+          title: editTitle,
+          tags: editTags,
+        }
+      );
+
+      if (error) throw error;
+      if (!updatedAidea) throw new Error("Failed to update AIdea");
+
+      // Update state
+      const updateAideaInArray = (prev: AIdea[]) =>
+        prev.map((a) => (a.id === editingAidea.id ? updatedAidea : a));
+
+      setRecentAideas(updateAideaInArray);
+      setAllAideas(updateAideaInArray);
+      setFilteredAideas(updateAideaInArray);
+
+      setIsEditDialogOpen(false);
+      setEditingAidea(null);
+    } catch (error) {
+      console.error("Error updating aidea:", error);
+    } finally {
+      setIsUpdating(false);
+    }
+  };
+
+  const handleDeleteAideaConfirm = (aidea: AIdea) => {
+    setDeletingAidea(aidea);
+    setIsDeleteDialogOpen(true);
+  };
+
+  const handleDeleteAidea = async () => {
+    if (!deletingAidea) return;
+
+    setIsDeleting(true);
+    try {
+      const { success, error } = await AIdeaService.delete(deletingAidea.id);
       if (error) throw error;
 
       // Update state
-      setRecentAideas((prev) => prev.filter((a) => a.id !== aideaId));
-      setAllAideas((prev) => prev.filter((a) => a.id !== aideaId));
-      setFilteredAideas((prev) => prev.filter((a) => a.id !== aideaId));
+      const removeAideaFromArray = (prev: AIdea[]) =>
+        prev.filter((a) => a.id !== deletingAidea.id);
+
+      setRecentAideas(removeAideaFromArray);
+      setAllAideas(removeAideaFromArray);
+      setFilteredAideas(removeAideaFromArray);
+
+      setIsDeleteDialogOpen(false);
+      setDeletingAidea(null);
     } catch (error) {
       console.error("Error deleting aidea:", error);
+    } finally {
+      setIsDeleting(false);
     }
   };
 
@@ -181,6 +265,24 @@ export default function Dashboard() {
     if (e.key === "Enter") {
       e.preventDefault();
       handleAddTag();
+    }
+  };
+
+  const handleAddEditTag = () => {
+    if (editTagInput.trim() && !editTags.includes(editTagInput.trim())) {
+      setEditTags([...editTags, editTagInput.trim()]);
+      setEditTagInput("");
+    }
+  };
+
+  const handleRemoveEditTag = (tagToRemove: string) => {
+    setEditTags(editTags.filter((tag) => tag !== tagToRemove));
+  };
+
+  const handleEditTagInputKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      handleAddEditTag();
     }
   };
 
@@ -376,7 +478,7 @@ export default function Dashboard() {
                                 className="h-8 w-8 p-0"
                                 onClick={(e) => {
                                   e.stopPropagation();
-                                  handleEditAidea(aidea.id);
+                                  handleEditAidea(aidea);
                                 }}
                               >
                                 <Edit className="h-4 w-4" />
@@ -387,7 +489,7 @@ export default function Dashboard() {
                                 className="h-8 w-8 p-0 text-destructive hover:text-destructive"
                                 onClick={(e) => {
                                   e.stopPropagation();
-                                  handleDeleteAidea(aidea.id);
+                                  handleDeleteAideaConfirm(aidea);
                                 }}
                               >
                                 <Trash2 className="h-4 w-4" />
@@ -480,7 +582,7 @@ export default function Dashboard() {
                             <ContextMenuItem
                               onClick={(e) => {
                                 e.stopPropagation();
-                                handleEditAidea(aidea.id);
+                                handleEditAidea(aidea);
                               }}
                             >
                               Edit
@@ -489,7 +591,7 @@ export default function Dashboard() {
                               className="text-destructive focus:text-destructive"
                               onClick={(e) => {
                                 e.stopPropagation();
-                                handleDeleteAidea(aidea.id);
+                                handleDeleteAideaConfirm(aidea);
                               }}
                             >
                               Delete
@@ -504,6 +606,122 @@ export default function Dashboard() {
             </div>
           </div>
         </div>
+
+        {/* Edit AIdea Dialog */}
+        <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
+          <DialogContent className="sm:max-w-[425px] text-foreground">
+            <DialogHeader>
+              <DialogTitle>Edit AIdea</DialogTitle>
+              <DialogDescription>
+                Make changes to your AIdea here. Click save when you're done.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="grid gap-4 py-4">
+              <div className="space-y-2">
+                <label htmlFor="edit-title" className="text-sm font-medium">
+                  Title
+                </label>
+                <Input
+                  id="edit-title"
+                  value={editTitle}
+                  onChange={(e) => setEditTitle(e.target.value)}
+                  placeholder="Enter title..."
+                />
+              </div>
+              <div className="space-y-2">
+                <label htmlFor="edit-tags" className="text-sm font-medium">
+                  Tags
+                </label>
+                <div className="flex space-x-2">
+                  <div className="relative flex-1">
+                    <Tag className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
+                    <Input
+                      id="edit-tags"
+                      placeholder="Add tags..."
+                      value={editTagInput}
+                      onChange={(e) => setEditTagInput(e.target.value)}
+                      onKeyUp={handleEditTagInputKeyPress}
+                      className="pl-10"
+                    />
+                  </div>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={handleAddEditTag}
+                    disabled={!editTagInput.trim()}
+                  >
+                    Add
+                  </Button>
+                </div>
+                {editTags.length > 0 && (
+                  <div className="flex flex-wrap gap-2 mt-2">
+                    {editTags.map((tag) => (
+                      <Badge
+                        key={tag}
+                        variant="secondary"
+                        className="flex items-center gap-1 pr-1"
+                      >
+                        <span>{tag}</span>
+                        <button
+                          type="button"
+                          className="ml-1 cursor-pointer"
+                          onClick={() => handleRemoveEditTag(tag)}
+                        >
+                          <X className="h-3 w-3" />
+                        </button>
+                      </Badge>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+            <DialogFooter>
+              <Button
+                variant="outline"
+                onClick={() => setIsEditDialogOpen(false)}
+              >
+                Cancel
+              </Button>
+              <Button
+                onClick={handleUpdateAidea}
+                disabled={!editTitle.trim() || isUpdating}
+              >
+                {isUpdating ? (
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                ) : null}
+                Save Changes
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Delete Confirmation Dialog */}
+        <AlertDialog
+          open={isDeleteDialogOpen}
+          onOpenChange={setIsDeleteDialogOpen}
+        >
+          <AlertDialogContent className="text-foreground">
+            <AlertDialogHeader>
+              <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+              <AlertDialogDescription>
+                This action cannot be undone. This will permanently delete the
+                AIdea "{deletingAidea?.title}" and remove all of its data.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancel</AlertDialogCancel>
+              <AlertDialogAction
+                onClick={handleDeleteAidea}
+                disabled={isDeleting}
+              >
+                {isDeleting ? (
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                ) : null}
+                Delete
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </div>
     </ProtectedRoute>
   );
