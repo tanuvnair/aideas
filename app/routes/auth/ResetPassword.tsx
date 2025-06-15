@@ -11,13 +11,22 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { Loader2, AlertCircle, CheckCircle, Eye, EyeOff } from "lucide-react";
+import {
+  Loader2,
+  AlertCircle,
+  CheckCircle,
+  Eye,
+  EyeOff,
+  ArrowLeft,
+  Brain,
+} from "lucide-react";
 import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { useNavigate } from "react-router";
 import { supabase } from "~/lib/supabase";
+import { ThemeToggle } from "~/components/theme-toggle";
 
 export const meta = () => {
   return [
@@ -123,7 +132,7 @@ export default function ResetPassword() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="fixed inset-0 flex items-center justify-center">
         <div className="flex flex-col items-center gap-4">
           <Loader2 className="h-8 w-8 animate-spin" />
           <p>Checking your session...</p>
@@ -134,8 +143,8 @@ export default function ResetPassword() {
 
   if (!hasSession) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <Card className="w-full max-w-md mx-4">
+      <div className="fixed inset-0 flex items-center justify-center p-4">
+        <Card className="w-full max-w-md">
           <CardHeader>
             <CardTitle className="text-center">Password Reset Failed</CardTitle>
           </CardHeader>
@@ -159,8 +168,8 @@ export default function ResetPassword() {
 
   if (success) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <Card className="w-full max-w-md mx-4">
+      <div className="fixed inset-0 flex items-center justify-center p-4">
+        <Card className="w-full max-w-md">
           <CardHeader>
             <CardTitle className="text-center">Password Updated</CardTitle>
           </CardHeader>
@@ -182,109 +191,137 @@ export default function ResetPassword() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center">
-      <Card className="w-full max-w-md mx-4">
-        <CardHeader>
-          <CardTitle className="text-center">Reset Your Password</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-              {error && (
-                <Alert variant="destructive">
-                  <AlertCircle className="h-4 w-4" />
-                  <AlertDescription>{error}</AlertDescription>
-                </Alert>
-              )}
+    <div className="fixed inset-0 flex flex-col text-foreground">
+      <nav className="flex items-center justify-between p-6 border-b sticky top-0 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 z-50">
+        <div
+          className="flex items-center gap-2 cursor-pointer"
+          onClick={() => navigate("/")}
+        >
+          <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
+            <Brain className="h-4 w-4 text-primary-foreground" />
+          </div>
+          <span className="text-lg font-semibold">AIdeas</span>
+        </div>
+        <div className="flex items-center gap-4">
+          <Button
+            variant="ghost"
+            className="flex items-center gap-2"
+            onClick={() => navigate(-1)}
+          >
+            <ArrowLeft className="h-4 w-4" />
+            Go Back
+          </Button>
+          <ThemeToggle />
+        </div>
+      </nav>
 
-              <FormField
-                control={form.control}
-                name="password"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>New Password</FormLabel>
-                    <FormControl>
-                      <div className="relative">
-                        <Input
-                          type={showPassword ? "text" : "password"}
-                          placeholder="Enter your new password"
-                          className="pr-10"
-                          {...field}
-                        />
-                        <Button
-                          type="button"
-                          variant="ghost"
-                          size="sm"
-                          className="absolute right-0 top-0 h-full px-3 hover:bg-transparent"
-                          onClick={() => setShowPassword(!showPassword)}
-                        >
-                          {showPassword ? (
-                            <EyeOff className="h-4 w-4 text-muted-foreground" />
-                          ) : (
-                            <Eye className="h-4 w-4 text-muted-foreground" />
-                          )}
-                        </Button>
-                      </div>
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="confirmPassword"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Confirm New Password</FormLabel>
-                    <FormControl>
-                      <div className="relative">
-                        <Input
-                          type={showConfirmPassword ? "text" : "password"}
-                          placeholder="Confirm your new password"
-                          className="pr-10"
-                          {...field}
-                        />
-                        <Button
-                          type="button"
-                          variant="ghost"
-                          size="sm"
-                          className="absolute right-0 top-0 h-full px-3 hover:bg-transparent"
-                          onClick={() =>
-                            setShowConfirmPassword(!showConfirmPassword)
-                          }
-                        >
-                          {showConfirmPassword ? (
-                            <EyeOff className="h-4 w-4 text-muted-foreground" />
-                          ) : (
-                            <Eye className="h-4 w-4 text-muted-foreground" />
-                          )}
-                        </Button>
-                      </div>
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <Button
-                type="submit"
-                className="w-full"
-                disabled={form.formState.isSubmitting}
+      <div className="flex-1 flex items-center justify-center p-4">
+        <Card className="w-full max-w-md">
+          <CardHeader>
+            <CardTitle className="text-center">Reset Your Password</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <Form {...form}>
+              <form
+                onSubmit={form.handleSubmit(onSubmit)}
+                className="space-y-4"
               >
-                {form.formState.isSubmitting ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Updating...
-                  </>
-                ) : (
-                  "Update Password"
+                {error && (
+                  <Alert variant="destructive">
+                    <AlertCircle className="h-4 w-4" />
+                    <AlertDescription>{error}</AlertDescription>
+                  </Alert>
                 )}
-              </Button>
-            </form>
-          </Form>
-        </CardContent>
-      </Card>
+
+                <FormField
+                  control={form.control}
+                  name="password"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>New Password</FormLabel>
+                      <FormControl>
+                        <div className="relative">
+                          <Input
+                            type={showPassword ? "text" : "password"}
+                            placeholder="Enter your new password"
+                            className="pr-10"
+                            {...field}
+                          />
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="sm"
+                            className="absolute right-0 top-0 h-full px-3 hover:bg-transparent"
+                            onClick={() => setShowPassword(!showPassword)}
+                          >
+                            {showPassword ? (
+                              <EyeOff className="h-4 w-4 text-muted-foreground" />
+                            ) : (
+                              <Eye className="h-4 w-4 text-muted-foreground" />
+                            )}
+                          </Button>
+                        </div>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="confirmPassword"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Confirm New Password</FormLabel>
+                      <FormControl>
+                        <div className="relative">
+                          <Input
+                            type={showConfirmPassword ? "text" : "password"}
+                            placeholder="Confirm your new password"
+                            className="pr-10"
+                            {...field}
+                          />
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="sm"
+                            className="absolute right-0 top-0 h-full px-3 hover:bg-transparent"
+                            onClick={() =>
+                              setShowConfirmPassword(!showConfirmPassword)
+                            }
+                          >
+                            {showConfirmPassword ? (
+                              <EyeOff className="h-4 w-4 text-muted-foreground" />
+                            ) : (
+                              <Eye className="h-4 w-4 text-muted-foreground" />
+                            )}
+                          </Button>
+                        </div>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <Button
+                  type="submit"
+                  className="w-full"
+                  disabled={form.formState.isSubmitting}
+                >
+                  {form.formState.isSubmitting ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Updating...
+                    </>
+                  ) : (
+                    "Update Password"
+                  )}
+                </Button>
+              </form>
+            </Form>
+          </CardContent>
+        </Card>
+      </div>
     </div>
   );
 }

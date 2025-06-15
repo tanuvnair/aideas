@@ -88,6 +88,10 @@ export default function Dashboard() {
   const [searchQuery, setSearchQuery] = useState("");
   const [isSearching, setIsSearching] = useState(false);
 
+  // Settings dialog state
+  const [isSettingsDialogOpen, setIsSettingsDialogOpen] = useState(false);
+  const [geminiApiKey, setGeminiApiKey] = useState("");
+
   // Edit dialog state
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [editingAidea, setEditingAidea] = useState<AIdea | null>(null);
@@ -151,6 +155,18 @@ export default function Dashboard() {
     setIsSigningOut(true);
     await supabase.auth.signOut();
     navigate("/signin");
+  };
+
+  const handleUpdateSettings = async () => {
+    setIsUpdating(true);
+    try {
+      localStorage.setItem("geminiApiKey", geminiApiKey); // Store API key locally
+      setIsSettingsDialogOpen(false);
+    } catch (error) {
+      console.error("Error updating settings:", error);
+    } finally {
+      setIsUpdating(false);
+    }
   };
 
   const handleCreateAidea = async () => {
@@ -303,7 +319,7 @@ export default function Dashboard() {
                     placeholder="Enter your aidea title..."
                     value={newAideaTitle}
                     onChange={(e) => setNewAideaTitle(e.target.value)}
-                    onKeyPress={(e) =>
+                    onKeyUp={(e) =>
                       e.key === "Enter" && !tagInput && handleCreateAidea()
                     }
                   />
@@ -389,7 +405,11 @@ export default function Dashboard() {
                     <Lightbulb className="mr-2 h-4 w-4" />
                     My AIdeas
                   </Button>
-                  <Button variant="ghost" className="w-full justify-start">
+                  <Button
+                    variant="ghost"
+                    className="w-full justify-start"
+                    onClick={() => setIsSettingsDialogOpen(true)}
+                  >
                     <Settings className="mr-2 h-4 w-4" />
                     Settings
                   </Button>
@@ -607,6 +627,62 @@ export default function Dashboard() {
             </div>
           </div>
         </div>
+
+        <Dialog
+          open={isSettingsDialogOpen}
+          onOpenChange={setIsSettingsDialogOpen}
+        >
+          <DialogContent className="sm:max-w-[425px] text-foreground">
+            <DialogHeader>
+              <DialogTitle>Settings</DialogTitle>
+              <DialogDescription>
+                Manage your account and AIdea settings here.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="grid gap-4 py-4">
+              <div className="space-y-4">
+                <div className="space-y-2">
+                  <Label
+                    htmlFor="gemini-api-key"
+                    className="text-sm font-medium"
+                  >
+                    Gemini API Key
+                  </Label>
+                  <Input
+                    id="gemini-api-key"
+                    type="password"
+                    value={geminiApiKey}
+                    onChange={(e) => setGeminiApiKey(e.target.value)}
+                    placeholder="Enter your Gemini API key..."
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    Your API key is stored locally in your browser.
+                  </p>
+                </div>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button
+                variant="outline"
+                onClick={() => setIsSettingsDialogOpen(false)}
+              >
+                Cancel
+              </Button>
+              <Button
+                variant="outline"
+                onClick={() => (window.location.href = "/reset-password")}
+              >
+                Reset Password
+              </Button>
+              <Button onClick={handleUpdateSettings} disabled={isUpdating}>
+                {isUpdating ? (
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                ) : null}
+                Save Changes
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
 
         {/* Edit AIdea Dialog */}
         <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
