@@ -97,9 +97,9 @@ export class AIdeaService {
         }
 
         if (filters.search) {
-          // Search in title and content (content is JSONB, so we'll search for text within it)
+          // Search in title and tags
           query = query.or(
-            `title.ilike.%${filters.search}%,content::text.ilike.%${filters.search}%`
+            `title.ilike.%${filters.search}%,tags.ilike.%${filters.search}%`
           );
         }
 
@@ -246,7 +246,36 @@ export class AIdeaService {
   static async search(
     query: string
   ): Promise<{ data: AIdea[] | null; error: string | null }> {
-    return this.getAll({ search: query });
+    try {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+
+      if (!user) {
+        return { data: null, error: "User not authenticated" };
+      }
+
+      // Search in title OR tags using full text search
+      const { data, error } = await supabase
+        .from("aideas")
+        .select("*")
+        .eq("user_id", user.id)
+        .textSearch("title", query, {
+          type: "plain",
+          config: "english",
+        })
+        .or(`tags.cs.{${query}}`);
+
+      if (error) {
+        console.error("Error searching AIdeas:", error);
+        return { data: null, error: error.message };
+      }
+
+      return { data: data || [], error: null };
+    } catch (err) {
+      console.error("Unexpected error searching AIdeas:", err);
+      return { data: null, error: "An unexpected error occurred" };
+    }
   }
 
   // Get AIdeas by tags

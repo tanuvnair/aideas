@@ -14,7 +14,6 @@ import { useNavigate } from "react-router";
 import {
   Loader2,
   Plus,
-  FileText,
   Lightbulb,
   Settings,
   LogOut,
@@ -23,29 +22,11 @@ import {
   Tag,
 } from "lucide-react";
 import { Separator } from "~/components/ui/separator";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { AIdeaService } from "~/lib/aideas";
 import type { AIdea } from "~/lib/aideas";
 import type { Route } from "../../+types/root";
 import { ThemeToggle } from "~/components/theme-toggle";
-
-export const meta: Route.MetaFunction = () => {
-  return [
-    { title: "AIdeas - Dashboard" },
-    {
-      name: "description",
-      content:
-        "Minimalist drawing and note-taking app enhanced with AI. Sketch, note, and create with intelligent assistance.",
-    },
-    { property: "og:title", content: "AIdeas - AI-Powered Creativity Tool" },
-    {
-      property: "og:description",
-      content:
-        "Transform your ideas into reality with AI-enhanced sketching and note-taking.",
-    },
-    { property: "og:type", content: "website" },
-  ];
-};
 
 export default function Dashboard() {
   const navigate = useNavigate();
@@ -56,24 +37,25 @@ export default function Dashboard() {
   const [isCreating, setIsCreating] = useState(false);
   const [recentAideas, setRecentAideas] = useState<AIdea[]>([]);
   const [allAideas, setAllAideas] = useState<AIdea[]>([]);
+  const [filteredAideas, setFilteredAideas] = useState<AIdea[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
+  const [isSearching, setIsSearching] = useState(false);
 
-  // Fetch aideas on component mount
+  // Fetch all aideas on component mount
   useEffect(() => {
     const fetchAideas = async () => {
       setIsLoading(true);
       try {
         // Fetch recent aideas (last 5)
         const { data: recentData } = await AIdeaService.getRecent();
-        if (recentData) {
-          setRecentAideas(recentData);
-        }
+        if (recentData) setRecentAideas(recentData);
 
         // Fetch all aideas
         const { data: allData } = await AIdeaService.getAll();
         if (allData) {
           setAllAideas(allData);
+          setFilteredAideas(allData);
         }
       } catch (error) {
         console.error("Error fetching aideas:", error);
@@ -85,27 +67,26 @@ export default function Dashboard() {
     fetchAideas();
   }, []);
 
-  // Handle search
+  // Handle search - now using client-side filtering for better performance
   useEffect(() => {
     if (searchQuery.trim()) {
-      const search = async () => {
-        const { data } = await AIdeaService.search(searchQuery);
-        if (data) {
-          setAllAideas(data);
-        }
-      };
-      search();
+      setIsSearching(true);
+      const timer = setTimeout(() => {
+        const filtered = allAideas.filter(
+          (aidea) =>
+            aidea.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            aidea.tags.some((tag) =>
+              tag.toLowerCase().includes(searchQuery.toLowerCase())
+            )
+        );
+        setFilteredAideas(filtered);
+        setIsSearching(false);
+      }, 300);
+      return () => clearTimeout(timer);
     } else {
-      // Reset to all aideas if search is cleared
-      const fetchAll = async () => {
-        const { data } = await AIdeaService.getAll();
-        if (data) {
-          setAllAideas(data);
-        }
-      };
-      fetchAll();
+      setFilteredAideas(allAideas);
     }
-  }, [searchQuery]);
+  }, [searchQuery, allAideas]);
 
   const handleSignOut = async () => {
     setIsSigningOut(true);
@@ -123,16 +104,13 @@ export default function Dashboard() {
         tags: newAideaTags,
       });
 
-      if (error) {
-        console.error("Error creating aidea:", error);
-        return;
-      }
+      if (error) throw error;
+      if (!newAidea) throw new Error("Failed to create AIdea");
 
-      if (newAidea) {
-        // Update the recent aideas and all aideas lists
-        setRecentAideas((prev) => [newAidea, ...prev.slice(0, 4)]);
-        setAllAideas((prev) => [newAidea, ...prev]);
-      }
+      // Update state
+      setRecentAideas((prev) => [newAidea, ...prev.slice(0, 4)]);
+      setAllAideas((prev) => [newAidea, ...prev]);
+      setFilteredAideas((prev) => [newAidea, ...prev]);
     } catch (error) {
       console.error("Error creating aidea:", error);
     } finally {
@@ -329,7 +307,9 @@ export default function Dashboard() {
                                   {aidea.title}
                                 </span>
                                 <p className="text-sm text-muted-foreground">
-                                  {aidea.created_at}
+                                  {new Date(
+                                    aidea.created_at
+                                  ).toLocaleDateString()}
                                 </p>
                                 <div className="flex flex-wrap gap-1">
                                   {aidea.tags.map((tag) => (
@@ -372,6 +352,9 @@ export default function Dashboard() {
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
                       />
+                      {isSearching && (
+                        <Loader2 className="absolute right-3 top-2.5 h-4 w-4 animate-spin" />
+                      )}
                     </div>
                   </div>
                 </CardHeader>
@@ -380,13 +363,15 @@ export default function Dashboard() {
                     <div className="flex justify-center items-center h-32">
                       <Loader2 className="h-8 w-8 animate-spin" />
                     </div>
-                  ) : allAideas.length === 0 ? (
+                  ) : filteredAideas.length === 0 ? (
                     <p className="text-muted-foreground text-center py-8">
-                      No aideas found. Create your first one!
+                      {searchQuery.trim()
+                        ? "No matching aideas found"
+                        : "No aideas found. Create your first one!"}
                     </p>
                   ) : (
                     <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-                      {allAideas.map((aidea) => (
+                      {filteredAideas.map((aidea) => (
                         <Card
                           key={aidea.id}
                           className="hover:shadow-md transition-shadow cursor-pointer"
@@ -400,7 +385,9 @@ export default function Dashboard() {
                                   {aidea.title}
                                 </h3>
                                 <p className="text-sm text-muted-foreground">
-                                  {aidea.created_at}
+                                  {new Date(
+                                    aidea.created_at
+                                  ).toLocaleDateString()}
                                 </p>
                                 <div className="flex flex-wrap gap-1">
                                   {aidea.tags.map((tag) => (
