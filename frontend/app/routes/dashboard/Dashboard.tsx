@@ -26,6 +26,9 @@ import { Separator } from "~/components/ui/separator";
 import { useState } from "react";
 
 import type { Route } from "../../+types/root";
+import { ThemeToggle } from "~/components/theme-toggle";
+import { Label } from "@radix-ui/react-label";
+import { FormLabel } from "~/components/ui/form";
 
 export const meta: Route.MetaFunction = () => {
   return [
@@ -303,8 +306,9 @@ export default function Dashboard() {
             {/* Main Content */}
             <div className="flex-1 space-y-8">
               <Card>
-                <CardHeader className="pb-4">
+                <CardHeader className="pb-4 flex items-center justify-between">
                   <CardTitle>Welcome Back!</CardTitle>
+                  <ThemeToggle />
                 </CardHeader>
                 <CardContent>
                   <p className="text-muted-foreground">
