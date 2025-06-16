@@ -40,9 +40,7 @@ import {
   Tag,
   Edit,
   Trash2,
-  MoreVertical,
   Brain,
-  RectangleEllipsis,
   RotateCcwKey,
 } from "lucide-react";
 import { Separator } from "~/components/ui/separator";
@@ -59,7 +57,6 @@ import {
 import type { Route } from "../../+types/root";
 import { Label } from "~/components/ui/label";
 import { encrypt } from "~/lib/encryption";
-import { string } from "zod";
 
 export const meta: Route.MetaFunction = () => {
   return [
