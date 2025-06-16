@@ -54,7 +54,7 @@ import {
   ContextMenuItem,
   ContextMenuTrigger,
 } from "~/components/ui/context-menu";
-import type { Route } from "../../+types/root";
+import type { Route } from "../+types/root";
 import { Label } from "~/components/ui/label";
 import { encrypt } from "~/lib/encryption";
 

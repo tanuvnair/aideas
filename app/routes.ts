@@ -10,4 +10,5 @@ export default [
   route("/signup", "routes/auth/SignUp.tsx"),
   route("/reset-password", "routes/auth/ResetPassword.tsx"),
   route("/dashboard", "routes/dashboard/Dashboard.tsx"),
+  route("/aidea/:id", "routes/aidea/Aidea.tsx"),
 ] satisfies RouteConfig;
