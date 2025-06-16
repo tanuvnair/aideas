@@ -692,7 +692,8 @@ export default function Dashboard() {
                     placeholder="Enter your Gemini API key..."
                   />
                   <p className="text-xs text-muted-foreground">
-                    Your API key is stored locally in your browser.
+                    Your API key is encrypted and stored securely in the
+                    database.
                   </p>
                 </div>
               </div>
