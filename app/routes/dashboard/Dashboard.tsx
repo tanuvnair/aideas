@@ -503,7 +503,7 @@ export default function Dashboard() {
                 <CardContent>
                   <p className="text-muted-foreground">
                     Ready to turn your aideas into reality? Start with a new
-                    note or drawing, or continue where you left off.
+                    note, or continue where you left off.
                   </p>
                 </CardContent>
               </Card>
