@@ -293,9 +293,9 @@ export default function LandingPage() {
                   <Button
                     variant="link"
                     className="p-0 h-auto"
-                    onClick={() => navigate("/contact")}
+                    onClick={() => navigate("/contact-us")}
                   >
-                    Contact
+                    Contact Us
                   </Button>
                 </li>
               </ul>

@@ -182,7 +182,8 @@ export default function ResetPassword() {
               </AlertDescription>
             </Alert>
             <div className="mt-4 flex justify-center">
-              <Loader2 className="h-6 w-6 animate-spin" />
+              <Loader2 className="mr-3 h-6 w-6 animate-spin" />
+              Loading...
             </div>
           </CardContent>
         </Card>
@@ -310,7 +311,7 @@ export default function ResetPassword() {
                 >
                   {form.formState.isSubmitting ? (
                     <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      <Loader2 className="h-4 w-4 animate-spin" />
                       Updating...
                     </>
                   ) : (

@@ -428,7 +428,7 @@ export default function Dashboard() {
                   >
                     {isCreating ? (
                       <>
-                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        <Loader2 className="h-4 w-4 animate-spin" />
                         Creating AIdea...
                       </>
                     ) : (
@@ -484,11 +484,16 @@ export default function Dashboard() {
                     disabled={isSigningOut}
                   >
                     {isSigningOut ? (
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        Signing Out...
+                      </>
                     ) : (
-                      <LogOut className="mr-2 h-4 w-4" />
+                      <>
+                        <LogOut className="mr-2 h-4 w-4" />
+                        Sign Out
+                      </>
                     )}
-                    Sign Out
                   </Button>
                 </CardFooter>
               </Card>
@@ -734,7 +739,7 @@ export default function Dashboard() {
               <Button onClick={handleUpdateSettings} disabled={isUpdating}>
                 {isUpdating ? (
                   <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    <Loader2 className="h-4 w-4 animate-spin" />
                     Saving...
                   </>
                 ) : (
@@ -784,7 +789,6 @@ export default function Dashboard() {
                   </div>
                   <Button
                     variant="outline"
-                    size="sm"
                     onClick={handleAddEditTag}
                     disabled={!editTagInput.trim()}
                   >
@@ -820,9 +824,13 @@ export default function Dashboard() {
                 disabled={!editTitle.trim() || isUpdating}
               >
                 {isUpdating ? (
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                ) : null}
-                Save Changes
+                  <>
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                    Saving Changes...
+                  </>
+                ) : (
+                  "Save Changes"
+                )}
               </Button>
             </DialogFooter>
           </DialogContent>
@@ -848,9 +856,13 @@ export default function Dashboard() {
                 disabled={isDeleting}
               >
                 {isDeleting ? (
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                ) : null}
-                Delete
+                  <>
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                    Deleting...
+                  </>
+                ) : (
+                  "Delete"
+                )}
               </AlertDialogAction>
             </AlertDialogFooter>
           </AlertDialogContent>
