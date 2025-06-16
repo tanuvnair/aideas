@@ -42,6 +42,8 @@ import {
   Trash2,
   MoreVertical,
   Brain,
+  RectangleEllipsis,
+  RotateCcwKey,
 } from "lucide-react";
 import { Separator } from "~/components/ui/separator";
 import { useState, useEffect } from "react";
@@ -414,11 +416,16 @@ export default function Dashboard() {
                     disabled={!newAideaTitle.trim() || isCreating}
                   >
                     {isCreating ? (
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        Creating AIdea...
+                      </>
                     ) : (
-                      <Plus className="mr-2 h-4 w-4" />
+                      <>
+                        <Plus className="mr-2 h-4 w-4" />
+                        Create AIdea
+                      </>
                     )}
-                    Create AIdea
                   </Button>
                 </CardContent>
               </Card>
@@ -448,6 +455,14 @@ export default function Dashboard() {
                   >
                     <Settings className="mr-2 h-4 w-4" />
                     Settings
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    className="w-full justify-start"
+                    onClick={() => (window.location.href = "/reset-password")}
+                  >
+                    <RotateCcwKey className="mr-2 h-4 w-4" />
+                    Reset Password
                   </Button>
                 </CardContent>
                 <CardFooter className="pt-4">
@@ -699,12 +714,6 @@ export default function Dashboard() {
               </div>
             </div>
             <DialogFooter>
-              <Button
-                variant="link"
-                onClick={() => (window.location.href = "/reset-password")}
-              >
-                Reset Password
-              </Button>
               <Button
                 variant="outline"
                 onClick={() => setIsSettingsDialogOpen(false)}
