@@ -1,6 +1,6 @@
 import CryptoJS from "crypto-js";
 
-const SECRET_KEY = import.meta.env.VITE_SECRET || "fallback-secret-key";
+const SECRET_KEY = import.meta.env.VITE_SECRET || "THISAINTNOSECRETXD";
 
 export const encrypt = (data: string): string => {
   return CryptoJS.AES.encrypt(data, SECRET_KEY).toString();
