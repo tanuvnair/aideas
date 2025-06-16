@@ -643,6 +643,7 @@ export default function Dashboard() {
           </div>
         </div>
 
+        {/* Settings Dialog */}
         <Dialog
           open={isSettingsDialogOpen}
           onOpenChange={setIsSettingsDialogOpen}
