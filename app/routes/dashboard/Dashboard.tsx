@@ -735,13 +735,12 @@ export default function Dashboard() {
               >
                 Cancel
               </Button>
-              <Button
-                onClick={handleUpdateSettings}
-                disabled={isUpdating}
-                className="w-32" // or any appropriate fixed width
-              >
+              <Button onClick={handleUpdateSettings} disabled={isUpdating}>
                 {isUpdating ? (
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Saving...
+                  </>
                 ) : (
                   "Save Changes"
                 )}
