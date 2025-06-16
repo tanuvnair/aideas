@@ -22,6 +22,7 @@ import {
   ArrowLeft,
   AlertCircle,
   CheckCircle,
+  Loader2,
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useForm, type SubmitHandler } from "react-hook-form";
@@ -379,9 +380,14 @@ export default function SignUp() {
                     className="w-full"
                     disabled={form.formState.isSubmitting}
                   >
-                    {form.formState.isSubmitting
-                      ? "Creating account..."
-                      : "Create Account"}
+                    {form.formState.isSubmitting ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        Creating account...
+                      </>
+                    ) : (
+                      "Create Account"
+                    )}
                   </Button>
                 </div>
               </Form>
