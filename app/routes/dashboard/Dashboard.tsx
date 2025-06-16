@@ -388,7 +388,6 @@ export default function Dashboard() {
                       </div>
                       <Button
                         variant="outline"
-                        size="sm"
                         onClick={handleAddTag}
                         disabled={!tagInput.trim()}
                       >
