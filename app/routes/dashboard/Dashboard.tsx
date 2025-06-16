@@ -59,6 +59,7 @@ import {
 import type { Route } from "../../+types/root";
 import { Label } from "~/components/ui/label";
 import { encrypt } from "~/lib/encryption";
+import { string } from "zod";
 
 export const meta: Route.MetaFunction = () => {
   return [
@@ -94,7 +95,7 @@ export default function Dashboard() {
 
   // Settings dialog state
   const [isSettingsDialogOpen, setIsSettingsDialogOpen] = useState(false);
-  const [geminiApiKey, setGeminiApiKey] = useState();
+  const [geminiApiKey, setGeminiApiKey] = useState("");
 
   // Edit dialog state
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
@@ -197,6 +198,7 @@ export default function Dashboard() {
       }
 
       console.log("Settings updated successfully:", data);
+      setGeminiApiKey(encryptedGeminiApiKey);
       setIsSettingsDialogOpen(false);
     } catch (error) {
       console.error("Error updating settings:", error);
