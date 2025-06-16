@@ -94,7 +94,7 @@ export default function Dashboard() {
 
   // Settings dialog state
   const [isSettingsDialogOpen, setIsSettingsDialogOpen] = useState(false);
-  const [geminiApiKey, setGeminiApiKey] = useState("");
+  const [geminiApiKey, setGeminiApiKey] = useState();
 
   // Edit dialog state
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
@@ -111,6 +111,18 @@ export default function Dashboard() {
 
   // Fetch all aideas on component mount
   useEffect(() => {
+    const fetchGeminiApiKey = async () => {
+      try {
+        const { data: geminiApiKey } = await supabase
+          .from("user_preferences")
+          .select("gemini_api_key")
+          .single();
+        if (geminiApiKey) setGeminiApiKey(geminiApiKey.gemini_api_key);
+      } catch (error) {
+        console.error("Error fetching gemini api key:", error);
+      }
+    };
+
     const fetchAideas = async () => {
       setIsLoading(true);
       try {
@@ -131,6 +143,7 @@ export default function Dashboard() {
       }
     };
 
+    fetchGeminiApiKey();
     fetchAideas();
   }, []);
 
