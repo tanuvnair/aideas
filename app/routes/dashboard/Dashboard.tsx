@@ -56,6 +56,7 @@ import {
 } from "~/components/ui/context-menu";
 import type { Route } from "../../+types/root";
 import { Label } from "~/components/ui/label";
+import { encrypt } from "~/lib/encryption";
 
 export const meta: Route.MetaFunction = () => {
   return [
@@ -161,7 +162,26 @@ export default function Dashboard() {
   const handleUpdateSettings = async () => {
     setIsUpdating(true);
     try {
-      localStorage.setItem("geminiApiKey", geminiApiKey); // Store API key locally
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      const userId = user?.id;
+
+      const encryptedGeminiApiKey = encrypt(geminiApiKey);
+
+      const { data, error } = await supabase
+        .from("user_preferences")
+        .upsert({
+          id: userId,
+          gemini_api_key: encryptedGeminiApiKey,
+        })
+        .select();
+
+      if (error) {
+        throw error;
+      }
+
+      console.log("Settings updated successfully:", data);
       setIsSettingsDialogOpen(false);
     } catch (error) {
       console.error("Error updating settings:", error);
@@ -690,11 +710,16 @@ export default function Dashboard() {
               >
                 Cancel
               </Button>
-              <Button onClick={handleUpdateSettings} disabled={isUpdating}>
+              <Button
+                onClick={handleUpdateSettings}
+                disabled={isUpdating}
+                className="w-32" // or any appropriate fixed width
+              >
                 {isUpdating ? (
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                ) : null}
-                Save Changes
+                ) : (
+                  "Save Changes"
+                )}
               </Button>
             </DialogFooter>
           </DialogContent>
