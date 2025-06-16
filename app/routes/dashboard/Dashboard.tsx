@@ -41,6 +41,7 @@ import {
   Edit,
   Trash2,
   MoreVertical,
+  Brain,
 } from "lucide-react";
 import { Separator } from "~/components/ui/separator";
 import { useState, useEffect } from "react";
@@ -307,6 +308,21 @@ export default function Dashboard() {
     <ProtectedRoute>
       <div className="min-h-screen bg-muted/40">
         <div className="container mx-auto px-6 py-8">
+          <div className="mb-8">
+            <Card className="flex flex-row justify-between items-center p-8">
+              <div
+                className="flex items-center gap-2 cursor-pointer"
+                onClick={() => navigate("/")}
+              >
+                <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
+                  <Brain className="h-4 w-4 text-primary-foreground" />
+                </div>
+                <span className="text-lg font-semibold">AIdeas</span>
+              </div>
+              <ThemeToggle />
+            </Card>
+          </div>
+
           <div className="flex flex-col lg:flex-row gap-8">
             {/* Sidebar */}
             <div className="w-full lg:w-72 space-y-6">
@@ -437,7 +453,6 @@ export default function Dashboard() {
               <Card>
                 <CardHeader className="pb-4 flex items-center justify-between">
                   <CardTitle>Welcome Back!</CardTitle>
-                  <ThemeToggle />
                 </CardHeader>
                 <CardContent>
                   <p className="text-muted-foreground">
