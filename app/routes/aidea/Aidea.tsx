@@ -22,6 +22,7 @@ import {
   Moon,
 } from "lucide-react";
 import { useState } from "react";
+import { useNavigate } from "react-router";
 
 // Theme Toggle Component
 const ThemeToggle = () => {
@@ -95,14 +96,7 @@ export default function Aidea() {
     setChatInput("");
   };
 
-  const navigate = (path: string | number) => {
-    // In a real app, you'd use your router's navigate function
-    if (typeof path === "number") {
-      window.history.go(path);
-    } else {
-      window.location.href = path;
-    }
-  };
+  const navigate = useNavigate();
 
   return (
     <ProtectedRoute>
